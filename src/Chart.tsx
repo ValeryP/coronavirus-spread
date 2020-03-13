@@ -23,26 +23,21 @@ const commonLineStyle = {
 const pastLineStyle = {...commonLineStyle, borderDash: []};
 const predictionLineStyle = {...commonLineStyle, borderDash: [5, 5]};
 
-export default function Chart({labels, data, country}: { labels: string[], data: number[], country: string }) {
+// @ts-ignore
+export default function Chart({labels, data, country}) {
+    const dataPerCountry = data.map((row: { [x: string]: any; }) => row[country]) as number[]
+
     function buildPrediction() {
-        const latestDaysNumber = 3
-        const latestDaysCases = _.slice(data, data.length - latestDaysNumber - 1);
+        const latestDaysNumber = 10
+        const latestDaysCases = _.slice(dataPerCountry, dataPerCountry.length - latestDaysNumber - 1);
         const latestDaysDelta = latestDaysCases.map((v, i) => i === 0 ? 0 : v - latestDaysCases[i - 1])
         const mults = latestDaysDelta.map(((v, i) => 1 + v / latestDaysCases[i]))
         const multsLatestDays = _.slice(mults, mults.length - latestDaysNumber);
         const avgMult = (multsLatestDays.reduce((a, b) => a + b, 0) / multsLatestDays.length) || 0;
-        // console.warn(latestDaysCases, latestDaysDelta, mults, avgMult);
-        // const weights = _.reverse(_.reduce(_.range(1, latestDaysNumber), (acc, v, i) => {
-        //     acc[i + 1] = acc[i] / 2
-        //     return acc
-        // }, [100 / 2] as number[]));
-        // console.warn(weights);
-        let prediction = _.reduce(_.range(1, latestDaysNumber + 1), (acc, v, i) => {
+        return _.reduce(_.range(1, latestDaysNumber + 1), (acc, v, i) => {
             acc[i] = _.reduce(_.range(0, v), (acc) => acc * avgMult, 1) * (_.last(latestDaysCases) || 0);
             return acc
-        }, [] as number[]);
-        // console.warn(prediction);
-        return prediction
+        }, [] as number[])
     }
 
     function buildNextDaysLabels(prediction: number[]) {
@@ -64,12 +59,12 @@ export default function Chart({labels, data, country}: { labels: string[], data:
                 {
                     ...pastLineStyle,
                     label: country,
-                    data: _.concat(data, prediction.map(() => NaN))
+                    data: _.concat(dataPerCountry, prediction.map(() => NaN))
                 },
                 {
                     ...predictionLineStyle,
                     label: country + ' [predicted]',
-                    data: _.concat(data.map((v, i) => i !== data.length - 1 ? NaN : v), prediction)
+                    data: _.concat(dataPerCountry.map((v, i) => i !== dataPerCountry.length - 1 ? NaN : v), prediction)
                 }
             ]
         }
