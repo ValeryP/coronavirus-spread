@@ -1,5 +1,6 @@
 {
   "name": "coronavirus-spread",
+  "homepage": "https://valeryp.github.io/coronavirus-spread",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -14,6 +15,7 @@
     "@types/react": "^16.9.0",
     "@types/react-dom": "^16.9.0",
     "chart.js": "^2.9.3",
+    "gh-pages": "^2.2.0",
     "lodash": "^4.17.15",
     "papaparse": "^5.1.1",
     "react": "^16.13.0",
@@ -25,6 +27,8 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "predeploy": "yarn build",
+    "deploy": "gh-pages -d build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -44,6 +48,11 @@
     ]
   },
   "devDependencies": {
-    "@types/papaparse": "^5.0.3"
+    "@types/papaparse": "^5.0.3",
+    "compression-webpack-plugin": "^3.0.1",
+    "glob": "7.1.4",
+    "html-webpack-plugin": "^3.2.0",
+    "webpack-bundle-analyzer": "^3.6.0",
+    "webpack-cli": "^3.3.10"
   }
 }
