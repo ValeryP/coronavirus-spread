@@ -27,8 +27,7 @@ export default function Chart({labels, dataPerCountry, country, days}: { labels:
     const monthShortNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
     function dateFormat(d: string) {
-        const t = new Date(d);
-        return t.getDate() + ' ' + monthShortNames[t.getMonth()] + ', ' + t.getFullYear();
+        return new Date(d).getDate() + ' ' + monthShortNames[new Date(d).getMonth()] + ', ' + new Date(d).getFullYear();
     }
 
     function normailizeLatestDaysNumber(latestDaysNumber: number) {
@@ -38,14 +37,14 @@ export default function Chart({labels, dataPerCountry, country, days}: { labels:
     }
 
     function buildPrediction() {
-        let predictionMaxRange = 31;
-        const latestDaysNumber = normailizeLatestDaysNumber(predictionMaxRange)
+        const predictionSample = 3;
+        const latestDaysNumber = normailizeLatestDaysNumber(predictionSample)
         const latestDaysCases = _.slice(dataPerCountry, dataPerCountry.length - latestDaysNumber - 1).map(x => Number(x));
         const latestDaysDelta = latestDaysCases.map((v, i) => i === 0 ? 0 : v - latestDaysCases[i - 1])
         const mults = latestDaysDelta.map(((v, i) => 1 + v / latestDaysCases[i]))
         const multsLatestDays = _.slice(mults, mults.length - latestDaysNumber);
         const avgMult = (multsLatestDays.reduce((a, b) => a + b, 0) / multsLatestDays.length) || 0;
-        return _.reduce(_.range(1, predictionMaxRange + 1), (acc, v, i) => {
+        return _.reduce(_.range(1, days + 1), (acc, v, i) => {
             acc[i] = Math.round(_.reduce(_.range(0, v), (acc) => acc * avgMult, 1) * (_.last(latestDaysCases) || 0));
             return acc
         }, [] as number[])
@@ -85,9 +84,5 @@ export default function Chart({labels, dataPerCountry, country, days}: { labels:
         }
     }
 
-    return (
-        <div>
-            <Line data={buildData()} width={100} height={45} legend={null}/>
-        </div>
-    );
+    return (<Line data={buildData()} width={100} height={45} legend={null}/>);
 }
