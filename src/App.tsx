@@ -1,5 +1,4 @@
 import React, {useEffect, useState} from 'react';
-import './App.css';
 import Papa from 'papaparse';
 import Chart from "./Chart";
 import {FormControl, InputLabel, MenuItem, Select} from "@material-ui/core";
@@ -9,8 +8,11 @@ import _ from "lodash";
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
+        root: {
+            margin: theme.spacing(2),
+        },
         formControl: {
-            margin: theme.spacing(1),
+            margin: theme.spacing(2),
             minWidth: 120,
         },
         selectEmpty: {
@@ -44,7 +46,6 @@ function App() {
             complete: function (results) {
                 setCountries(_.uniq(_.flatMap(_.values(results.data)).flatMap(x => _.keys(x))).filter(x => x !== 'date'))
                 setLabels(results.data.map(row => row['date']))
-                console.log(_.values(results.data))
                 setData(results.data)
             }
         });
@@ -52,12 +53,11 @@ function App() {
 
     useEffect(loadData, []);
 
-    function buildSelect() {
+    function buildCountrySelect() {
         return <>
             <FormControl variant="outlined" className={classes.formControl}>
-                <InputLabel ref={inputLabel} id="demo-simple-select-outlined-label">
-                    Country
-                </InputLabel>
+                <InputLabel ref={inputLabel}
+                            id="demo-simple-select-outlined-label">Country</InputLabel>
                 <Select
                     labelId="select-country-label"
                     id="select-country"
@@ -65,18 +65,16 @@ function App() {
                     onChange={handleChange}
                     labelWidth={labelWidth}
                 >
-                    {
-                        countries.map((country, index) =>
-                            <MenuItem key={index} value={country}>{country}</MenuItem>)
-                    }
+                    {countries.map((country, index) => <MenuItem key={index}
+                                                                 value={country}>{country}</MenuItem>)}
                 </Select>
             </FormControl>
         </>
     }
 
     return (
-        <div className="App">
-            {buildSelect()}
+        <div className={classes.root}>
+            {buildCountrySelect()}
             {data.length && <Chart labels={labels} data={data} country={country}/>}
         </div>
     );

@@ -25,17 +25,39 @@ const predictionLineStyle = {...commonLineStyle, borderDash: [5, 5]};
 
 // @ts-ignore
 export default function Chart({labels, data, country}) {
-    const dataPerCountry = data.map((row: { [x: string]: any; }) => row[country]) as number[]
+    const dataPerCountry = data.map((row: { [x: string]: any; }) => row[country]) as string[]
+    const monthShortNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+    function dateFormat(d: string) {
+        const t = new Date(d);
+        return t.getDate() + ' ' + monthShortNames[t.getMonth()] + ', ' + t.getFullYear();
+    }
+
+    function normailizeLatestDaysNumber(latestDaysNumber: number) {
+        let latestDaysCases = _.slice(dataPerCountry, dataPerCountry.length - latestDaysNumber - 1);
+        const latestDaysCasesNonZero = latestDaysCases.filter(x => x !== "").length
+        let finalNumber = latestDaysCasesNonZero < latestDaysNumber ? latestDaysCasesNonZero - 1 : latestDaysNumber;
+        console.log(latestDaysCases, latestDaysCasesNonZero, finalNumber)
+        return finalNumber;
+    }
+
+    const toNumber = (x: string) => {
+        return x === "" ? 0 : Number(x);
+    }
+
+    const toString = (x: number) => {
+        return String(x);
+    }
 
     function buildPrediction() {
-        const latestDaysNumber = 10
-        const latestDaysCases = _.slice(dataPerCountry, dataPerCountry.length - latestDaysNumber - 1);
+        const latestDaysNumber = normailizeLatestDaysNumber(10)
+        const latestDaysCases = _.slice(dataPerCountry, dataPerCountry.length - latestDaysNumber - 1).map(toNumber);
         const latestDaysDelta = latestDaysCases.map((v, i) => i === 0 ? 0 : v - latestDaysCases[i - 1])
         const mults = latestDaysDelta.map(((v, i) => 1 + v / latestDaysCases[i]))
         const multsLatestDays = _.slice(mults, mults.length - latestDaysNumber);
         const avgMult = (multsLatestDays.reduce((a, b) => a + b, 0) / multsLatestDays.length) || 0;
         return _.reduce(_.range(1, latestDaysNumber + 1), (acc, v, i) => {
-            acc[i] = _.reduce(_.range(0, v), (acc) => acc * avgMult, 1) * (_.last(latestDaysCases) || 0);
+            acc[i] = Math.round(_.reduce(_.range(0, v), (acc) => acc * avgMult, 1) * (_.last(latestDaysCases) || 0));
             return acc
         }, [] as number[])
     }
@@ -45,7 +67,6 @@ export default function Chart({labels, data, country}) {
             const latestDate = new Date(_.last(labels) || Date.now());
             latestDate.setDate(latestDate.getDate() + i + 1);
             acc[i] = latestDate.toISOString().slice(0, -14);
-            // console.warn(acc[i]);
             return acc
         }, [] as string[]);
     }
@@ -53,18 +74,23 @@ export default function Chart({labels, data, country}) {
     const buildData = () => {
         const prediction = buildPrediction()
         const predictionLabest = buildNextDaysLabels(prediction)
+        const existingData = _.concat(dataPerCountry.map(toNumber), prediction.map(() => NaN));
+        const predictedData = _.concat(dataPerCountry.map((v, i) => i !== dataPerCountry.length - 1 ? NaN : v), prediction);
+        const labelsNormalized = _.concat(labels, predictionLabest).map(dateFormat);
+        let indexOfFirstPacient = _.findIndex(existingData, (x) => x > 0) - 1
+        indexOfFirstPacient = indexOfFirstPacient < 0 ? 0 : indexOfFirstPacient
         return {
-            labels: _.concat(labels, predictionLabest),
+            labels: labelsNormalized.slice(indexOfFirstPacient),
             datasets: [
                 {
                     ...pastLineStyle,
                     label: country,
-                    data: _.concat(dataPerCountry, prediction.map(() => NaN))
+                    data: existingData.slice(indexOfFirstPacient)
                 },
                 {
                     ...predictionLineStyle,
-                    label: country + ' [predicted]',
-                    data: _.concat(dataPerCountry.map((v, i) => i !== dataPerCountry.length - 1 ? NaN : v), prediction)
+                    label: country + ' (predicted)',
+                    data: predictedData.slice(indexOfFirstPacient)
                 }
             ]
         }
@@ -72,7 +98,7 @@ export default function Chart({labels, data, country}) {
 
     return (
         <div>
-            <Line data={buildData()}/>
+            <Line data={buildData()} width={100} height={45} legend={null}/>
         </div>
     );
 }
