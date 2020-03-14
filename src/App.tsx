@@ -108,7 +108,7 @@ function App() {
         })), 4) as string[];
     }
 
-    const listOfCountries = _.reverse(_.sortBy(countries, x => _.sum(getCasesPerCountry(x).map(x => Number(x)))));
+    const listOfCountries = _.sortBy(countries);
 
     function buildCountrySelect() {
         return <>
