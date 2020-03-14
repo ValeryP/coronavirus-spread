@@ -13,19 +13,17 @@ const commonLineStyle = {
     pointBorderColor: 'rgba(75,192,192,1)',
     pointBackgroundColor: '#fff',
     pointBorderWidth: 1,
-    pointHoverRadius: 5,
+    pointHoverRadius: 10,
     pointHoverBackgroundColor: 'rgba(75,192,192,1)',
     pointHoverBorderColor: 'rgba(220,220,220,1)',
     pointHoverBorderWidth: 2,
-    pointRadius: 3,
+    pointRadius: 5,
     pointHitRadius: 10
 };
 const pastLineStyle = {...commonLineStyle, borderDash: []};
 const predictionLineStyle = {...commonLineStyle, borderDash: [5, 5]};
 
-// @ts-ignore
-export default function Chart({labels, data, country}) {
-    const dataPerCountry = data.map((row: { [x: string]: any; }) => row[country]) as string[]
+export default function Chart({labels, dataPerCountry, country, days}: { labels: string[], dataPerCountry: string[], country: string, days: number }) {
     const monthShortNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
     function dateFormat(d: string) {
@@ -35,28 +33,19 @@ export default function Chart({labels, data, country}) {
 
     function normailizeLatestDaysNumber(latestDaysNumber: number) {
         let latestDaysCases = _.slice(dataPerCountry, dataPerCountry.length - latestDaysNumber - 1);
-        const latestDaysCasesNonZero = latestDaysCases.filter(x => x !== "").length
-        let finalNumber = latestDaysCasesNonZero < latestDaysNumber ? latestDaysCasesNonZero - 1 : latestDaysNumber;
-        console.log(latestDaysCases, latestDaysCasesNonZero, finalNumber)
-        return finalNumber;
-    }
-
-    const toNumber = (x: string) => {
-        return x === "" ? 0 : Number(x);
-    }
-
-    const toString = (x: number) => {
-        return String(x);
+        const latestDaysCasesNonZero = latestDaysCases.filter(x => x !== "0").length
+        return latestDaysCasesNonZero < latestDaysNumber ? latestDaysCasesNonZero - 1 : latestDaysNumber;
     }
 
     function buildPrediction() {
-        const latestDaysNumber = normailizeLatestDaysNumber(10)
-        const latestDaysCases = _.slice(dataPerCountry, dataPerCountry.length - latestDaysNumber - 1).map(toNumber);
+        let predictionMaxRange = 31;
+        const latestDaysNumber = normailizeLatestDaysNumber(predictionMaxRange)
+        const latestDaysCases = _.slice(dataPerCountry, dataPerCountry.length - latestDaysNumber - 1).map(x => Number(x));
         const latestDaysDelta = latestDaysCases.map((v, i) => i === 0 ? 0 : v - latestDaysCases[i - 1])
         const mults = latestDaysDelta.map(((v, i) => 1 + v / latestDaysCases[i]))
         const multsLatestDays = _.slice(mults, mults.length - latestDaysNumber);
         const avgMult = (multsLatestDays.reduce((a, b) => a + b, 0) / multsLatestDays.length) || 0;
-        return _.reduce(_.range(1, latestDaysNumber + 1), (acc, v, i) => {
+        return _.reduce(_.range(1, predictionMaxRange + 1), (acc, v, i) => {
             acc[i] = Math.round(_.reduce(_.range(0, v), (acc) => acc * avgMult, 1) * (_.last(latestDaysCases) || 0));
             return acc
         }, [] as number[])
@@ -65,16 +54,16 @@ export default function Chart({labels, data, country}) {
     function buildNextDaysLabels(prediction: number[]) {
         return _.reduce(prediction, (acc, v, i) => {
             const latestDate = new Date(_.last(labels) || Date.now());
-            latestDate.setDate(latestDate.getDate() + i + 1);
+            latestDate.setDate(latestDate.getDate() + i + 2);
             acc[i] = latestDate.toISOString().slice(0, -14);
             return acc
         }, [] as string[]);
     }
 
     const buildData = () => {
-        const prediction = buildPrediction()
+        const prediction = _.slice(buildPrediction(), 0, days)
         const predictionLabest = buildNextDaysLabels(prediction)
-        const existingData = _.concat(dataPerCountry.map(toNumber), prediction.map(() => NaN));
+        const existingData = _.concat(dataPerCountry.map(x => Number(x)), prediction.map(() => NaN));
         const predictedData = _.concat(dataPerCountry.map((v, i) => i !== dataPerCountry.length - 1 ? NaN : v), prediction);
         const labelsNormalized = _.concat(labels, predictionLabest).map(dateFormat);
         let indexOfFirstPacient = _.findIndex(existingData, (x) => x > 0) - 1
