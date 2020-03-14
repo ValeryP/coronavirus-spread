@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import Papa, {ParseResult} from 'papaparse';
 import Chart from "./Chart";
-import {FormControl, InputLabel, MenuItem, Select} from "@material-ui/core";
+import {FormControl, Grid, InputLabel, Link, MenuItem, Select, Typography} from "@material-ui/core";
 import {createStyles, makeStyles, Theme} from "@material-ui/core/styles";
 import _ from "lodash";
 
@@ -9,6 +9,7 @@ import _ from "lodash";
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
         root: {
+            marginLeft: 0,
             margin: theme.spacing(2),
             textAlign: 'center'
         },
@@ -16,15 +17,35 @@ const useStyles = makeStyles((theme: Theme) =>
             margin: theme.spacing(2),
             minWidth: 100,
         },
-        selectEmpty: {
+        footer: {
             marginTop: theme.spacing(2),
         },
+        chart: {
+            width: '95%',
+            height: '95%'
+        }
     }),
 );
 
 function App() {
     const classes = useStyles();
     const baseUrl = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-";
+    const types = {
+        'Confirmed': '#2C98F0',
+        'Deaths': '#FC562E',
+        'Recovered': '#52AF55'
+    };
+    const daysMapping = {
+        'Tomorrow': 1,
+        '2 days': 2,
+        '3 days': 3,
+        '4 days': 4,
+        '5 days': 5,
+        '1 week': 7,
+        '2 weeks': 14,
+        '3 weeks': 21,
+        '1 month': 31
+    }
 
     const [labels, setLabels] = useState([] as string[]);
     const [country, setCountry] = useState("Italy");
@@ -111,17 +132,6 @@ function App() {
     }
 
     function buildDaysSelect() {
-        const daysMapping = {
-            'Tomorrow': 1,
-            'in 2 days': 2,
-            'in 3 days': 3,
-            'in 4 days': 4,
-            'in 5 days': 5,
-            'in 1 week': 7,
-            'in 2 weeks': 14,
-            'in 3 weeks': 21,
-            'in 1 month': 31
-        }
         return <>
             <FormControl variant="outlined" className={classes.formControl}>
                 <InputLabel ref={inputDaysLabel}
@@ -143,7 +153,6 @@ function App() {
     }
 
     function buildTypeSelect() {
-        const types = ['Confirmed', 'Deaths', 'Recovered'];
         return <>
             <FormControl variant="outlined" className={classes.formControl}>
                 <InputLabel ref={inputDataTypeLabel}
@@ -156,8 +165,8 @@ function App() {
                     labelWidth={labelDataTypeWidth}
                 >
                     {
-                        _.map(types, (value, index) => <MenuItem key={index}
-                                                                 value={value}>{value}</MenuItem>)
+                        _.map(_.keys(types), (value, index) => <MenuItem key={index}
+                                                                         value={value}>{value}</MenuItem>)
                     }
                 </Select>
             </FormControl>
@@ -165,20 +174,47 @@ function App() {
     }
 
     function buildChart() {
+        // @ts-ignore
+        let color = types[dataType];
         return data.length
-            ? (<Chart labels={labels} dataPerCountry={getCasesPerCountry(country)} country={country}
-                      days={days}/>)
+            ? <Chart labels={labels} dataPerCountry={getCasesPerCountry(country)} country={country}
+                     days={days} color={color}/>
             : '';
     }
 
+    function getFooter() {
+        return <Typography variant={"caption"}>
+            <Link target="_blank" href="https://github.com/CSSEGISandData/COVID-19">
+                Data source
+            </Link>
+            {' | '}
+            <Link target="_blank" href="https://t.me/coronavirus_spread">
+                Feedback
+            </Link>
+            {' | '}
+            <Link target="_blank" href="https://github.com/ValeryP/coronavirus-spread">
+                Github
+            </Link>
+        </Typography>;
+    }
+
     return (
-        <div className={classes.root}>
-            {buildTypeSelect()}
-            {buildCountrySelect()}
-            {buildDaysSelect()}
-            {buildChart()}
-        </div>
-    );
+        <Grid
+            container direction="column" justify="center" alignItems="center"
+            className={classes.root}>
+            <Grid item>
+                {buildTypeSelect()}
+                {buildCountrySelect()}
+                {buildDaysSelect()}
+            </Grid>
+            <Grid item className={classes.chart}>
+                {buildChart()}
+            </Grid>
+            <Grid item className={classes.footer} >
+                {getFooter()}
+            </Grid>
+        </Grid>
+    )
 }
 
 export default App;
