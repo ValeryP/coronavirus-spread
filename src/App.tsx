@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import Papa, {ParseResult} from 'papaparse';
 import Chart from "./Chart";
-import {FormControl, Grid, InputLabel, Link, MenuItem, Select, Typography} from "@material-ui/core";
+import {FormControl, Grid, InputLabel, MenuItem, Select, Typography} from "@material-ui/core";
 import {createStyles, makeStyles, Theme} from "@material-ui/core/styles";
 import _ from "lodash";
 import ReactGA from 'react-ga';
@@ -49,7 +49,7 @@ function App() {
     }
 
     const [labels, setLabels] = useState([] as string[]);
-    const [country, setCountry] = useState("Italy");
+    const [country, setCountry] = useState("Worldwide");
     const [dataType, setDataType] = useState("Confirmed");
     const [countries, setCountries] = useState([] as string[]);
     const [days, setDays] = useState(1);
@@ -101,7 +101,7 @@ function App() {
     function processLoadedData(results: ParseResult) {
         let data = results.data;
         let labels = _.slice(_.keys(data[0]), 4) as string[]
-        let countries = data.map(row => row['Province/State'].length > 0 ? `${row['Country/Region']}/${row['Province/State']}` : row['Country/Region']);
+        let countries = _.concat(['Worldwide'], _.sortBy(data.map(row => row['Province/State'].length > 0 ? `${row['Country/Region']}/${row['Province/State']}` : row['Country/Region'])));
         setCountries(countries)
         setLabels(labels)
         setData(data)
@@ -119,15 +119,42 @@ function App() {
     useEffect(loadData, [dataType]);
 
     function getCasesPerCountry(countryToCheck: string) {
-        return _.slice(_.values(_.find(data, row => {
-            let isComplexRegion = _.indexOf(countryToCheck, '/') !== -1;
-            const region = isComplexRegion ? _.split(countryToCheck, '/')[0] : countryToCheck
-            const state = isComplexRegion ? _.split(countryToCheck, '/')[1] : ""
-            return row['Country/Region'] === region && row['Province/State'] === state
-        })), 4) as string[];
+        if (countryToCheck === 'Worldwide') {
+            let casesSelection = _.map(data, x => _.slice(_.values(x), 4) as string[]);
+            return _.filter(_.reduce(casesSelection, (acc, value, index) => {
+                acc[index] = String(_.sum(_.map(casesSelection, (row => Number(row[index])))));
+                return acc
+            }, [] as string[]), (value) => Number(value) > 0);
+        } else {
+            return _.slice(_.values(_.find(data, row => {
+                let isComplexRegion = _.indexOf(countryToCheck, '/') !== -1;
+                const region = isComplexRegion ? _.split(countryToCheck, '/')[0] : countryToCheck
+                const state = isComplexRegion ? _.split(countryToCheck, '/')[1] : ""
+                return row['Country/Region'] === region && row['Province/State'] === state
+            })), 4) as string[];
+        }
     }
 
-    const listOfCountries = _.sortBy(countries);
+    function buildTypeSelect() {
+        return <>
+            <FormControl variant="outlined" className={classes.formControl}>
+                <InputLabel ref={inputDataTypeLabel}
+                            id="select-type-input-id">Type</InputLabel>
+                <Select
+                    labelId="select-type-select-label"
+                    id="select-type-select-id"
+                    value={dataType}
+                    onChange={handleDataTypeChange}
+                    labelWidth={labelDataTypeWidth}
+                >
+                    {
+                        _.map(_.keys(types), (value, index) => <MenuItem key={index}
+                                                                         value={value}>{value}</MenuItem>)
+                    }
+                </Select>
+            </FormControl>
+        </>
+    }
 
     function buildCountrySelect() {
         return <>
@@ -142,7 +169,7 @@ function App() {
                     labelWidth={labelCountryWidth}
                 >
                     {
-                        listOfCountries.map((country, index) =>
+                        countries.map((country, index) =>
                             <MenuItem key={index} value={country}>{country}</MenuItem>)
                     }
                 </Select>
@@ -171,32 +198,12 @@ function App() {
         </>
     }
 
-    function buildTypeSelect() {
-        return <>
-            <FormControl variant="outlined" className={classes.formControl}>
-                <InputLabel ref={inputDataTypeLabel}
-                            id="select-type-input-id">Type</InputLabel>
-                <Select
-                    labelId="select-type-select-label"
-                    id="select-type-select-id"
-                    value={dataType}
-                    onChange={handleDataTypeChange}
-                    labelWidth={labelDataTypeWidth}
-                >
-                    {
-                        _.map(_.keys(types), (value, index) => <MenuItem key={index}
-                                                                         value={value}>{value}</MenuItem>)
-                    }
-                </Select>
-            </FormControl>
-        </>
-    }
-
     function buildChart() {
         // @ts-ignore
-        let color = types[dataType];
+        const color = types[dataType];
+        const dataPerCountry = getCasesPerCountry(country);
         return data.length
-            ? <Chart labels={labels} dataPerCountry={getCasesPerCountry(country)} country={country}
+            ? <Chart labels={labels} dataPerCountry={dataPerCountry} country={country}
                      days={days} color={color}/>
             : '';
     }
