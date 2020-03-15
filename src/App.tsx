@@ -4,7 +4,7 @@ import Chart from "./Chart";
 import {FormControl, Grid, InputLabel, Link, MenuItem, Select, Typography} from "@material-ui/core";
 import {createStyles, makeStyles, Theme} from "@material-ui/core/styles";
 import _ from "lodash";
-
+import ReactGA from 'react-ga';
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -19,6 +19,7 @@ const useStyles = makeStyles((theme: Theme) =>
         },
         footer: {
             marginTop: theme.spacing(2),
+            opacity: 0.5
         },
         chart: {
             width: '95%',
@@ -68,15 +69,33 @@ function App() {
     }, []);
 
     const handleCountryChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-        setCountry(event.target.value as string);
+        let newCountry = event.target.value as string;
+        ReactGA.event({
+            category: 'Select',
+            action: 'Country',
+            label: newCountry
+        });
+        setCountry(newCountry);
     };
 
     const handleDaysChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-        setDays(event.target.value as number);
+        let newRange = event.target.value as number;
+        ReactGA.event({
+            category: 'Select',
+            action: 'Range',
+            label: _.findKey(newRange)
+        });
+        setDays(newRange);
     };
 
     const handleDataTypeChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-        setDataType(event.target.value as string);
+        let newType = event.target.value as string;
+        ReactGA.event({
+            category: 'Select',
+            action: 'Type',
+            label: newType
+        });
+        setDataType(newType);
     };
 
     function processLoadedData(results: ParseResult) {
@@ -184,17 +203,23 @@ function App() {
 
     function getFooter() {
         return <Typography variant={"caption"}>
-            <Link target="_blank" href="https://github.com/CSSEGISandData/COVID-19">
+            <ReactGA.OutboundLink
+                eventLabel="Data source" target="_blank"
+                to="https://github.com/CSSEGISandData/COVID-19">
                 Data source
-            </Link>
+            </ReactGA.OutboundLink>
             {' | '}
-            <Link target="_blank" href="https://t.me/coronavirus_spread">
+            <ReactGA.OutboundLink
+                eventLabel="Feedback" target="_blank"
+                to="https://t.me/coronavirus_spread">
                 Feedback
-            </Link>
+            </ReactGA.OutboundLink>
             {' | '}
-            <Link target="_blank" href="https://github.com/ValeryP/coronavirus-spread">
+            <ReactGA.OutboundLink
+                eventLabel="Github" target="_blank"
+                to="https://github.com/ValeryP/coronavirus-spread">
                 Github
-            </Link>
+            </ReactGA.OutboundLink>
         </Typography>;
     }
 
@@ -210,7 +235,7 @@ function App() {
             <Grid item className={classes.chart}>
                 {buildChart()}
             </Grid>
-            <Grid item className={classes.footer} >
+            <Grid item className={classes.footer}>
                 {getFooter()}
             </Grid>
         </Grid>
