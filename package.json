@@ -25,6 +25,7 @@
     "react-cookie": "^4.0.3",
     "react-dom": "^16.13.0",
     "react-ga": "^2.7.0",
+    "react-localization": "^1.0.15",
     "react-scripts": "3.4.0",
     "typescript": "~3.7.2"
   },

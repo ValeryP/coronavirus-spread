@@ -7,9 +7,7 @@ import _ from "lodash";
 import ReactGA from 'react-ga';
 import moment from "moment";
 import {useCookies} from "react-cookie";
-
-const {Octokit} = require("@octokit/rest");
-const octokit = new Octokit();
+import {strings} from './strings'
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -35,25 +33,28 @@ const useStyles = makeStyles((theme: Theme) =>
     }),
 );
 
+const {Octokit} = require("@octokit/rest");
+const octokit = new Octokit();
+
 function App() {
     const classes = useStyles();
     const baseUrl = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-";
     const types = {
-        'Confirmed': '#2C98F0',
-        'Deaths': '#FC562E',
-        'Recovered': '#52AF55'
+        [strings.Confirmed]: '#2C98F0',
+        [strings.Deaths]: '#FC562E',
+        [strings.Recovered]: '#52AF55'
     };
     const daysMapping = {
-        'Tomorrow': 1,
-        '2 days': 2,
-        '3 days': 3,
-        '1 week': 7
+        [strings.Tomorrow]: 1,
+        [strings.days2]: 2,
+        [strings.days3]: 3,
+        [strings.week1]: 7
     }
     const [cookies, setCookie] = useCookies(['saved-prefs']);
 
     const [labels, setLabels] = useState([] as Date[]);
-    const [country, setCountry] = useState(cookies['country'] || 'Worldwide');
-    const [dataType, setDataType] = useState(cookies['type'] || 'Confirmed');
+    const [country, setCountry] = useState(cookies['country'] || strings.Worldwide);
+    const [dataType, setDataType] = useState(cookies['type'] || strings.Confirmed);
     const [countries, setCountries] = useState([] as string[]);
     const [days, setDays] = useState(cookies['prediction'] || 1);
     const [data, setData] = useState([] as any[]);
@@ -111,7 +112,7 @@ function App() {
             complete: function (results) {
                 let data = results.data;
                 let labels = _.map(_.slice(_.keys(data[0]), 4), (strDate) => moment(strDate).add(1, 'days').toDate())
-                let countries = _.concat(['Worldwide'], _.sortBy(data.map(row => row['Province/State'].length > 0 ? `${row['Country/Region']}/${row['Province/State']}` : row['Country/Region'])));
+                let countries = _.concat([strings.Worldwide], _.sortBy(data.map(row => row['Province/State'].length > 0 ? `${row['Country/Region']}/${row['Province/State']}` : row['Country/Region'])));
                 setCountries(countries)
                 setLabels(labels)
                 setData(data)
@@ -133,7 +134,7 @@ function App() {
     useEffect(loadLastUpdateTime, []);
 
     function getCasesPerCountry(countryToCheck: string) {
-        if (countryToCheck === 'Worldwide') {
+        if (countryToCheck === strings.Worldwide) {
             let casesSelection = _.map(data, x => _.slice(_.values(x), 4) as string[]);
             return _.filter(_.reduce(casesSelection, (acc, value, index) => {
                 acc[index] = String(_.sum(_.map(casesSelection, (row => Number(row[index])))));
