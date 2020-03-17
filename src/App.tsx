@@ -5,6 +5,7 @@ import {FormControl, Grid, InputLabel, MenuItem, Select, Typography} from "@mate
 import {createStyles, makeStyles, Theme} from "@material-ui/core/styles";
 import _ from "lodash";
 import ReactGA from 'react-ga';
+import moment from "moment";
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -48,7 +49,7 @@ function App() {
         '1 month': 31
     }
 
-    const [labels, setLabels] = useState([] as string[]);
+    const [labels, setLabels] = useState([] as Date[]);
     const [country, setCountry] = useState("Worldwide");
     const [dataType, setDataType] = useState("Confirmed");
     const [countries, setCountries] = useState([] as string[]);
@@ -100,7 +101,7 @@ function App() {
 
     function processLoadedData(results: ParseResult) {
         let data = results.data;
-        let labels = _.slice(_.keys(data[0]), 4) as string[]
+        let labels = _.map(_.slice(_.keys(data[0]), 4), (strDate) => moment(strDate).add(1, 'days').toDate())
         let countries = _.concat(['Worldwide'], _.sortBy(data.map(row => row['Province/State'].length > 0 ? `${row['Country/Region']}/${row['Province/State']}` : row['Country/Region'])));
         setCountries(countries)
         setLabels(labels)

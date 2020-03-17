@@ -1,10 +1,9 @@
 import React from 'react';
 import {Line} from 'react-chartjs-2';
 import _ from "lodash";
+import moment from "moment";
 
-export default function Chart({labels, dataPerCountry, country, days, color}: { labels: string[], dataPerCountry: string[], country: string, days: number, color: string }) {
-    const monthShortNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
+export default function Chart({labels, dataPerCountry, country, days, color}: { labels: Date[], dataPerCountry: string[], country: string, days: number, color: string }) {
     const commonLineStyle = {
         backgroundColor: color + 'AA',
         borderColor: color,
@@ -24,10 +23,6 @@ export default function Chart({labels, dataPerCountry, country, days, color}: { 
     };
     const pastLineStyle = {...commonLineStyle, borderDash: [], pointRadius: 3};
     const predictionLineStyle = {...commonLineStyle, borderDash: [5, 5], pointRadius: 5};
-
-    function dateFormat(d: string) {
-        return new Date(d).getDate() + ' ' + monthShortNames[new Date(d).getMonth()] + ', ' + new Date(d).getFullYear();
-    }
 
     function normailizeLatestDaysNumber(latestDaysNumber: number) {
         let latestDaysCases = _.slice(dataPerCountry, dataPerCountry.length - latestDaysNumber - 1);
@@ -51,11 +46,9 @@ export default function Chart({labels, dataPerCountry, country, days, color}: { 
 
     function buildNextDaysLabels(prediction: number[]) {
         return _.reduce(prediction, (acc, v, i) => {
-            const latestDate = new Date(_.last(labels) || Date.now());
-            latestDate.setDate(latestDate.getDate() + i + 2);
-            acc[i] = latestDate.toISOString().slice(0, -14);
+            acc[i] = moment(_.last(labels) || Date.now()).add(i + 1, "days").toDate();
             return acc
-        }, [] as string[]);
+        }, [] as Date[]);
     }
 
     const buildData = () => {
@@ -63,7 +56,7 @@ export default function Chart({labels, dataPerCountry, country, days, color}: { 
         const predictionLabest = buildNextDaysLabels(prediction)
         const existingData = _.concat(dataPerCountry.map(x => Number(x)), prediction.map(() => NaN));
         const predictedData = _.concat(dataPerCountry.map((v, i) => i !== dataPerCountry.length - 1 ? NaN : v), prediction);
-        const labelsNormalized = _.concat(labels, predictionLabest).map(dateFormat);
+        const labelsNormalized = _.concat(labels, predictionLabest).map(date => moment(date).format('ll'));
         let indexOfFirstPacient = _.findIndex(existingData, (x) => x > 0) - 1
         indexOfFirstPacient = indexOfFirstPacient < 0 ? 0 : indexOfFirstPacient
         return {
