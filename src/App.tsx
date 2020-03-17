@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import Papa, {ParseResult} from 'papaparse';
+import Papa from 'papaparse';
 import Chart from "./Chart";
 import {FormControl, Grid, InputLabel, MenuItem, Select, Typography} from "@material-ui/core";
 import {createStyles, makeStyles, Theme} from "@material-ui/core/styles";
@@ -7,6 +7,9 @@ import _ from "lodash";
 import ReactGA from 'react-ga';
 import moment from "moment";
 import {useCookies} from "react-cookie";
+
+const {Octokit} = require("@octokit/rest");
+const octokit = new Octokit();
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -23,9 +26,11 @@ const useStyles = makeStyles((theme: Theme) =>
             marginTop: theme.spacing(2),
             opacity: 0.5
         },
+        latestUpdate: {
+            opacity: 0.5
+        },
         chart: {
-            width: '95%',
-            height: '95%'
+            width: '90%'
         }
     }),
 );
@@ -52,6 +57,7 @@ function App() {
     const [countries, setCountries] = useState([] as string[]);
     const [days, setDays] = useState(cookies['prediction'] || 1);
     const [data, setData] = useState([] as any[]);
+    const [lastUpdate, setLastUpdate] = useState('');
 
     const inputCountryLabel = React.useRef<HTMLLabelElement>(null);
     const [labelCountryWidth, setLabelCountryWidth] = React.useState(0);
@@ -99,25 +105,32 @@ function App() {
         setDataType(newType);
     };
 
-    function processLoadedData(results: ParseResult) {
-        let data = results.data;
-        let labels = _.map(_.slice(_.keys(data[0]), 4), (strDate) => moment(strDate).add(1, 'days').toDate())
-        let countries = _.concat(['Worldwide'], _.sortBy(data.map(row => row['Province/State'].length > 0 ? `${row['Country/Region']}/${row['Province/State']}` : row['Country/Region'])));
-        setCountries(countries)
-        setLabels(labels)
-        setData(data)
-    }
-
     const loadData = () => {
         Papa.parse(baseUrl + dataType + '.csv', {
             skipEmptyLines: true, header: true, download: true, delimiter: ',',
             complete: function (results) {
-                processLoadedData(results);
+                let data = results.data;
+                let labels = _.map(_.slice(_.keys(data[0]), 4), (strDate) => moment(strDate).add(1, 'days').toDate())
+                let countries = _.concat(['Worldwide'], _.sortBy(data.map(row => row['Province/State'].length > 0 ? `${row['Country/Region']}/${row['Province/State']}` : row['Country/Region'])));
+                setCountries(countries)
+                setLabels(labels)
+                setData(data)
             }
         });
     }
 
+    const loadLastUpdateTime = () => {
+        octokit.repos.listCommits({
+            owner: 'CSSEGISandData',
+            repo: 'COVID-19'
+        }).then((x: any) => {
+            const latestCommitTime = _.values(x['data'])[0]['commit']['committer']['date']
+            setLastUpdate(moment(latestCommitTime).fromNow());
+        });
+    }
+
     useEffect(loadData, [dataType]);
+    useEffect(loadLastUpdateTime, []);
 
     function getCasesPerCountry(countryToCheck: string) {
         if (countryToCheck === 'Worldwide') {
@@ -231,6 +244,10 @@ function App() {
         </Typography>;
     }
 
+    function buildLastUpdateLabel() {
+        return <Typography variant={"caption"}>{`Latest update ${lastUpdate}`}</Typography>;
+    }
+
     return (
         <Grid
             container direction="column" justify="center" alignItems="center"
@@ -240,6 +257,8 @@ function App() {
                 {buildCountrySelect()}
                 {buildDaysSelect()}
             </Grid>
+            {lastUpdate &&
+            <Grid item className={classes.latestUpdate}>{buildLastUpdateLabel()}</Grid>}
             <Grid item className={classes.chart}>
                 {buildChart()}
             </Grid>
