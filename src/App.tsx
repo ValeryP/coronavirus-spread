@@ -6,6 +6,7 @@ import {createStyles, makeStyles, Theme} from "@material-ui/core/styles";
 import _ from "lodash";
 import ReactGA from 'react-ga';
 import moment from "moment";
+import {useCookies} from "react-cookie";
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -48,12 +49,13 @@ function App() {
         '3 weeks': 21,
         '1 month': 31
     }
+    const [cookies, setCookie] = useCookies(['saved-prefs']);
 
     const [labels, setLabels] = useState([] as Date[]);
-    const [country, setCountry] = useState("Worldwide");
-    const [dataType, setDataType] = useState("Confirmed");
+    const [country, setCountry] = useState(cookies['country'] || 'Worldwide');
+    const [dataType, setDataType] = useState(cookies['type'] || 'Confirmed');
     const [countries, setCountries] = useState([] as string[]);
-    const [days, setDays] = useState(1);
+    const [days, setDays] = useState(cookies['prediction'] || 1);
     const [data, setData] = useState([] as any[]);
 
     const inputCountryLabel = React.useRef<HTMLLabelElement>(null);
@@ -76,6 +78,7 @@ function App() {
             action: 'Country',
             label: newCountry
         });
+        setCookie('country', newCountry, {path: '/'});
         setCountry(newCountry);
     };
 
@@ -86,6 +89,7 @@ function App() {
             action: 'Range',
             label: _.findKey(newRange)
         });
+        setCookie('prediction', newRange, {path: '/'});
         setDays(newRange);
     };
 
@@ -96,6 +100,7 @@ function App() {
             action: 'Type',
             label: newType
         });
+        setCookie('type', newType, {path: '/'});
         setDataType(newType);
     };
 
