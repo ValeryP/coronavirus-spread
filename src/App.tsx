@@ -42,12 +42,7 @@ function App() {
         'Tomorrow': 1,
         '2 days': 2,
         '3 days': 3,
-        '4 days': 4,
-        '5 days': 5,
-        '1 week': 7,
-        '2 weeks': 14,
-        '3 weeks': 21,
-        '1 month': 31
+        '1 week': 7
     }
     const [cookies, setCookie] = useCookies(['saved-prefs']);
 
