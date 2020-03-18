@@ -39,9 +39,9 @@ function App() {
     const classes = useStyles();
     const baseUrl = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-";
     const types = {
-        'Confirmed': '#2C98F0',
+        'Confirmed': '#f57c00',
         'Deaths': '#FC562E',
-        'Recovered': '#52AF55'
+        'Recovered': '#388e3c'
     };
     const daysMapping = {
         'Tomorrow': 1,
