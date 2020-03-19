@@ -293,7 +293,14 @@ function App() {
             const deviationsAll = _.zipWith(dataExistingPlot, dataPredictedPlot, mismatchPercentage);
             const rangeStart = deviationsAll.length - days - deviationAgeDays < 0 ? 0 : deviationsAll.length - days - deviationAgeDays;
             const deviations = _.slice(deviationsAll, rangeStart, rangeStart + deviationAgeDays).filter(x => !isNaN(x));
-            return _.round(100 - _.mean(deviations), 1);
+            const acc = _.round(100 - _.mean(deviations), 1);
+            if (acc <= 0) {
+                return 1;
+            } else if (acc >= 100) {
+                return 99;
+            } else {
+                return acc;
+            }
         }
 
         const labelsNormalized = _.concat(labels, buildNextDaysLabels(_.last(labels)!, days));
