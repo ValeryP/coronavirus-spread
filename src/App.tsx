@@ -257,14 +257,12 @@ function App() {
                 {buildCountrySelect()}
                 {buildDaysSelect()}
             </Grid>
-            {lastUpdate &&
-            <Grid item className={classes.latestUpdate}>{buildLastUpdateLabel()}</Grid>}
             <Grid item className={classes.chart}>
                 {buildChart()}
             </Grid>
-            <Grid item className={classes.footer}>
-                {getFooter()}
-            </Grid>
+            <Grid item className={classes.footer}>{getFooter()}</Grid>
+            {lastUpdate &&
+            <Grid item className={classes.latestUpdate}>{buildLastUpdateLabel()}</Grid>}
         </Grid>
     )
 }

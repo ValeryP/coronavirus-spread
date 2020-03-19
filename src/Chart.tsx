@@ -42,9 +42,12 @@ export default function Chart({labels, dataPerCountry, country, days, color}: { 
         }, [] as Date[]);
     }
 
-    function buildPrediction(dataArray: number[], logs: boolean = false) {
-        const mults = _.reduce(dataArray, (acc, value, i) => {
-            let previousValue = dataArray[i - 1];
+    function nextDayPrediction(allDays: Dictionary<number>, currentDate: Date) {
+        const predictionSampleSize = 3;
+        const index = _.indexOf(_.keys(allDays), moment(currentDate).format('l'))
+        const lastPart = _.slice(_.values(allDays), index - predictionSampleSize, index + 1);
+        const mults = _.reduce(lastPart, (acc, value, i) => {
+            let previousValue = lastPart[i - 1];
             if (i > 0 && previousValue > 0 && !isNaN(value) && !isNaN(previousValue)) {
                 acc[i - 1] = value / previousValue
             }
@@ -52,52 +55,65 @@ export default function Chart({labels, dataPerCountry, country, days, color}: { 
         }, [] as number[])
         let remove = _.filter(mults, x => !_.isNaN(x));
         const avgMult = _.mean(remove) || 1
-        if (logs) {
-            console.warn('xxx - mults:', mults)
-            console.warn('xxx - remove:', remove)
-            console.warn('xxx - avgMult:', avgMult)
-        }
         return _.reduce(_.range(1, 2), (acc, v, i) => {
-            acc[i] = Math.round(_.reduce(_.range(0, v), (acc) => acc * avgMult, 1) * (_.last(dataArray) || 0));
+            acc[i] = Math.round(_.reduce(_.range(0, v), (acc) => acc * avgMult, 1) * (_.last(lastPart) || 0));
             return acc
         }, [] as number[])[0];
     }
 
+    function onlyValidNumbers(values: number[]) {
+        return _.filter(values, (v) => v !== undefined);
+    }
 
-    function nextDayPrediction(allDays: Dictionary<number>, currentDate: string, logs: boolean = false) {
-        const index = _.indexOf(_.keys(allDays), currentDate)
-        const lastPart = _.slice(_.values(allDays), index - 3, index + 1);
-        const prediction = buildPrediction(lastPart, logs)
-        if (logs) {
-            console.warn('xxx allDays:', allDays);
-            console.warn('xxx currentDate:', currentDate)
-            console.warn('xxx index:', index)
-            console.warn('xxx last:', lastPart)
-            console.warn('xxx last:', prediction)
+    function zipLabelsWithValues(dateLabels: Date[], values: number[]): Dictionary<number> {
+        return _.zipObject(dateLabels.map(x => moment(x).format('l')), values);
+    }
+
+    function buildPrediction(labelsNormalized: Date[], existingData: Dictionary<number>, range: number) {
+        let oneDayPrediction = _.concat([0], _.take(_.map(labelsNormalized, (date: Date) => nextDayPrediction(existingData, date)), _.values(existingData).length));
+        let predictionAcc = zipLabelsWithValues(labelsNormalized, oneDayPrediction);
+        for (let i = 1; i < range; i++) {
+            const targetDay = labelsNormalized[_.findIndex(_.values(predictionAcc), v => v === undefined) - 1]
+            const nextDayPredicted = nextDayPrediction(predictionAcc, targetDay)
+            const newPredictionSerie = _.concat(onlyValidNumbers(_.values(predictionAcc)), [nextDayPredicted]);
+            predictionAcc = zipLabelsWithValues(labelsNormalized, newPredictionSerie)
         }
-        return prediction
+        return _.values(predictionAcc);
+    }
+
+    function calculateAccuracy(dataExistingPlot: number[], dataPredictedPlot: number[]) {
+        function mismatchPercentage(existing: number, predicted: number) {
+            if (existing === predicted) {
+                return 0;
+            } else if (existing === 0 || predicted === 0) {
+                return (existing + predicted) * 100
+            } else {
+                const biggerVal = _.max([existing, predicted])!;
+                const smallerVal = _.min([existing, predicted])!;
+                return Math.round(Math.abs(1 - biggerVal / smallerVal) * 100);
+            }
+        }
+
+        const deviationAgeDays = 7;
+        const deviations = _.takeRight(_.zipWith(dataExistingPlot, dataPredictedPlot, mismatchPercentage), deviationAgeDays);
+        return Math.round(_.mean(deviations));
     }
 
     const buildData = () => {
-        const existingData = _.zipObject(labels.map(x => moment(x).format('l')), dataPerCountry.map(Number))
-        const prediction = _.concat([0], _.map(_.keys(existingData), (date: string) => nextDayPrediction(existingData, date)))
-        // console.warn(nextDayPrediction(existingData, '1/02/2020', true))
-        const labelsNormalized = _.concat(labels, buildNextDaysLabels(_.last(labels)!, prediction.length - _.values(existingData).length)).map(date => moment(date).format('ll'));
+        const labelsNormalized = _.concat(labels, buildNextDaysLabels(_.last(labels)!, days));
+        const existingData = zipLabelsWithValues(labels, dataPerCountry.map(Number));
+        const prediction = buildPrediction(labelsNormalized, existingData, days)
         let indexOfFirstPacient = _.findIndex(_.values(existingData), (x) => x > 0) - 1
         indexOfFirstPacient = indexOfFirstPacient < 0 ? 0 : indexOfFirstPacient
+        let dataExistingPlot = _.values(existingData).slice(indexOfFirstPacient);
+        let dataPredictedPlot = _.values(prediction).slice(indexOfFirstPacient);
+        console.warn(calculateAccuracy(dataExistingPlot, dataPredictedPlot))
+        let labelsPlot = labelsNormalized.slice(indexOfFirstPacient).map(date => moment(date).format('ll'));
         return {
-            labels: labelsNormalized.slice(indexOfFirstPacient),
+            labels: labelsPlot,
             datasets: [
-                {
-                    ...predictionLineStyle,
-                    label: country + ' (predicted)',
-                    data: _.values(prediction).slice(indexOfFirstPacient)
-                },
-                {
-                    ...pastLineStyle,
-                    label: country,
-                    data: _.values(existingData).slice(indexOfFirstPacient)
-                }
+                {...pastLineStyle, label: country, data: dataExistingPlot},
+                {...predictionLineStyle, label: country + ' (predicted)', data: dataPredictedPlot}
             ]
         }
     }
