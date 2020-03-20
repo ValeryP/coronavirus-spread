@@ -238,7 +238,7 @@ function App() {
         }
 
         function nextDayPrediction(allDays: Dictionary<number>, currentDate: Date) {
-            const predictionSampleSize = 3;
+            const predictionSampleSize = 5;
             const index = _.indexOf(_.keys(allDays), moment(currentDate).format('l'))
             const lastPart = _.slice(_.values(allDays), index - predictionSampleSize, index + 1);
             const mults = _.reduce(lastPart, (acc, value, i) => {
@@ -313,6 +313,9 @@ function App() {
         let dataPredictedPlot = _.values(prediction).slice(indexOfFirstPacient);
         let labelsPlot = labelsNormalized.slice(indexOfFirstPacient).map(date => moment(date).format('ll'));
         const accuracy = calculateAccuracy(dataExistingPlot, dataPredictedPlot, days);
+        if (accuracy < 60) {
+            dataPredictedPlot = dataPredictedPlot.map(_ => NaN);
+        }
         const predictionTomorrow = _.findLast(buildPrediction(labelsNormalized, existingData, 1), (x) => x !== undefined);
         // @ts-ignore
         const color = types[dataType];
@@ -321,18 +324,26 @@ function App() {
             ? (
                 <>
                     <Grid item>
-                        <Grid item container direction="row" justify="center"
-                              alignItems="center">
-                            <Grid item>
-                                <Typography variant={"caption"}>
-                                    {ReactHtmlParser(`There is <strong>${accuracy}%</strong> chance to have <strong>${predictionTomorrow}</strong> ${_.lowerCase(dataType)} tomorrow (${country})`)}
-                                </Typography>
-                            </Grid>
-                            <Grid item>
-                                <Tooltip title={titleTooltip} arrow TransitionComponent={Fade}>
-                                    <InfoRoundedIcon className={classes.infoIcon}/>
-                                </Tooltip>
-                            </Grid>
+                        <Grid item container direction="row" justify="center" alignItems="center">
+                            {accuracy > 60
+                                ? <>
+                                    <Grid item>
+                                        <Typography variant={"caption"}>
+                                            {ReactHtmlParser(`There is <strong>${accuracy}%</strong> chance to have <strong>${predictionTomorrow}</strong> ${_.lowerCase(dataType)} tomorrow (${country})`)}
+                                        </Typography>
+                                    </Grid>
+                                    <Grid item>
+                                        <Tooltip title={titleTooltip} arrow
+                                                 TransitionComponent={Fade}>
+                                            <InfoRoundedIcon className={classes.infoIcon}/>
+                                        </Tooltip>
+                                    </Grid>
+                                </>
+                                : <>
+                                    <Typography variant={"caption"}>
+                                        {ReactHtmlParser(`${country} does not have enough <strong>${_.lowerCase(dataType)}</strong> cases for reliable prediction`)}
+                                    </Typography>
+                                </>}
                         </Grid>
                     </Grid>
                     <Grid item>
