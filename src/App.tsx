@@ -9,6 +9,7 @@ import ConfirmedPerCountry from "./ConfirmedPerCountry";
 import SpeedOfGrowth from "./SpeedOfGrowth";
 import SymptomsAndFatality from "./SymptomsAndFatality";
 import ReactGA from "react-ga";
+import Dashboard from "./Dashboard";
 
 
 interface TabPanelProps {
@@ -55,8 +56,8 @@ function App() {
         }} />
     }
 
-    const tabs = ['Prediction', 'Daily new deaths', 'Deaths per million', 'Tests by country',
-        'Daily new confirmed', 'Speed of growth', 'Symptoms and fatality']
+    const tabs = ['Dashboard', 'Prediction', 'Daily new deaths', 'Deaths per million',
+        'Tests by country', 'Daily new confirmed', 'Speed of growth', 'Symptoms and fatality']
 
     return <>
         <AppBar position="sticky">
@@ -66,24 +67,27 @@ function App() {
             </Tabs>
         </AppBar>
         <TabPanel value={value} index={0}>
-            <Prediction/>
+            <Dashboard/>
         </TabPanel>
         <TabPanel value={value} index={1}>
-            <DailyNewDeaths/>
+            <Prediction/>
         </TabPanel>
         <TabPanel value={value} index={2}>
-            <DeathsPerMillion/>
+            <DailyNewDeaths/>
         </TabPanel>
         <TabPanel value={value} index={3}>
-            <TestsPerCountry/>
+            <DeathsPerMillion/>
         </TabPanel>
         <TabPanel value={value} index={4}>
-            <ConfirmedPerCountry/>
+            <TestsPerCountry/>
         </TabPanel>
         <TabPanel value={value} index={5}>
-            <SpeedOfGrowth/>
+            <ConfirmedPerCountry/>
         </TabPanel>
         <TabPanel value={value} index={6}>
+            <SpeedOfGrowth/>
+        </TabPanel>
+        <TabPanel value={value} index={7}>
             <SymptomsAndFatality/>
         </TabPanel>
     </>
