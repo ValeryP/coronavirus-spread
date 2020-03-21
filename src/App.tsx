@@ -56,7 +56,7 @@ function App() {
     }
 
     const tabs = ['Prediction', 'Daily new deaths', 'Deaths per million', 'Tests by country',
-        'Confirmed by country', 'Speed of growth', 'Symptoms and fatality']
+        'Daily new confirmed', 'Speed of growth', 'Symptoms and fatality']
 
     return <>
         <AppBar position="static">
