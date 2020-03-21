@@ -59,8 +59,9 @@ function App() {
         'Daily new confirmed', 'Speed of growth', 'Symptoms and fatality']
 
     return <>
-        <AppBar position="static">
-            <Tabs value={value} onChange={handleChange} aria-label="simple tabs example">
+        <AppBar position="sticky">
+            <Tabs value={value} onChange={handleChange} aria-label="tabs"
+                  variant="scrollable" scrollButtons="auto">
                 {_.map(tabs, (v, ind) => buildTabTitle(v, ind))}
             </Tabs>
         </AppBar>
