@@ -363,13 +363,7 @@ function App() {
                 to="https://github.com/CSSEGISandData/COVID-19">
                 Data source
             </ReactGA.OutboundLink>
-            {' | '}
-            <ReactGA.OutboundLink
-                eventLabel="Feedback" target="_blank"
-                to="https://t.me/coronavirus_spread">
-                Feedback
-            </ReactGA.OutboundLink>
-            {' | '}
+            {' • '}
             <ReactGA.OutboundLink
                 eventLabel="Github" target="_blank"
                 to="https://github.com/ValeryP/coronavirus-spread">
