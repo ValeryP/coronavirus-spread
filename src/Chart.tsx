@@ -38,5 +38,5 @@ export default function Chart({labelsPlot, dataExistingPlot, dataPredictedPlot, 
             {...pastLineStyle, label: country, data: dataExistingPlot},
             {...predictionLineStyle, label: country + ' (predicted)', data: dataPredictedPlot}
         ]
-    }} width={100} height={45} legend={null}/>;
+    }} width={100} height={40} legend={null}/>;
 }

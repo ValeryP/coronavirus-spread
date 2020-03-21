@@ -10,3 +10,5 @@ ReactGA.pageview(window.location.pathname);
 const theme = createMuiTheme();
 ReactDOM.render(<ThemeProvider theme={theme}><App/></ThemeProvider>,
     document.getElementById('root'));
+
+document.body.style.margin = '0';
