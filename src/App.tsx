@@ -1,13 +1,14 @@
 import React, {useEffect} from 'react';
 import Prediction from "./Prediction";
-import {AppBar, Box, Tab, Tabs, Typography} from "@material-ui/core";
+import {AppBar, Box, IconButton, Tab, Tabs, Typography} from "@material-ui/core";
 import _ from "lodash";
 import ReactGA from "react-ga";
 import Dashboard from "./Dashboard";
 import {useCookies} from "react-cookie";
 import Analysis from "./Analysis";
 import {createStyles, makeStyles, Theme} from "@material-ui/core/styles";
-
+import AddRoundedIcon from '@material-ui/icons/AddRounded';
+import AddTabDialog from "./AddTabDialog";
 
 interface TabPanelProps {
     children?: React.ReactNode;
@@ -48,9 +49,24 @@ function App() {
 
     const [cookies, setCookie] = useCookies(['saved-prefs']);
     const [value, setValue] = React.useState(Number(cookies['tab-main']) || 0);
+    const [showAddTabDialog, setShowAddTabDialog] = React.useState(false);
 
     const handleChange = (event: React.ChangeEvent<{}>, newValue: number) => {
         setValue(newValue);
+    };
+
+    const handleAddButtonClick = () => {
+        setShowAddTabDialog(true)
+    };
+
+    const handleAddTab = () => {
+        console.warn("handleAddTab");
+        handleAddTabClose()
+    };
+
+    const handleAddTabClose = () => {
+        console.warn("handleAddTabClose");
+        setShowAddTabDialog(false)
     };
 
     function handleTabClick(name: string, index: number) {
@@ -81,6 +97,9 @@ function App() {
         <AppBar position="sticky">
             <Tabs value={value} onChange={handleChange} variant="scrollable" scrollButtons="auto">
                 {_.map(tabs, (v, ind) => buildTabTitle(v, ind, value))}
+                <IconButton aria-haspopup="true" color="inherit" onClick={handleAddButtonClick}>
+                    <AddRoundedIcon/>
+                </IconButton>
             </Tabs>
         </AppBar>
         <TabPanel value={value} index={0}>
@@ -92,6 +111,8 @@ function App() {
         <TabPanel value={value} index={2}>
             <Analysis/>
         </TabPanel>
+        <AddTabDialog isOpen={showAddTabDialog} handleSave={handleAddTab}
+                      handleClose={handleAddTabClose}/>
     </>
 }
 
