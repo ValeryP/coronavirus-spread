@@ -1,13 +1,15 @@
-import React, {useEffect} from 'react';
-import Prediction from "./Prediction";
+import React from 'react';
 import {AppBar, Box, Tab, Tabs, Typography} from "@material-ui/core";
 import _ from "lodash";
+import DailyNewDeaths from "./DailyNewDeaths";
+import DeathsPerMillion from "./DeathsPerMillion";
+import TestsPerCountry from "./TestsPerCountry";
+import ConfirmedPerCountry from "./ConfirmedPerCountry";
+import SpeedOfGrowth from "./SpeedOfGrowth";
+import SymptomsAndFatality from "./SymptomsAndFatality";
 import ReactGA from "react-ga";
-import Dashboard from "./Dashboard";
 import {useCookies} from "react-cookie";
-import Analysis from "./Analysis";
 import {createStyles, makeStyles, Theme} from "@material-ui/core/styles";
-
 
 interface TabPanelProps {
     children?: React.ReactNode;
@@ -43,11 +45,11 @@ const useStyles = makeStyles((theme: Theme) =>
     }),
 );
 
-function App() {
+function Analysis() {
     const classes = useStyles();
 
     const [cookies, setCookie] = useCookies(['saved-prefs']);
-    const [value, setValue] = React.useState(Number(cookies['tab-main']) || 0);
+    const [value, setValue] = React.useState(Number(cookies['tab-analysis']) || 0);
 
     const handleChange = (event: React.ChangeEvent<{}>, newValue: number) => {
         setValue(newValue);
@@ -59,7 +61,7 @@ function App() {
             action: 'Tab',
             label: name
         });
-        setCookie('tab-main', index, {path: '/'});
+        setCookie('tab-analysis', index, {path: '/'});
     }
 
     function buildTabTitle(name: string, index: number, selected: number) {
@@ -71,11 +73,7 @@ function App() {
                     }} />
     }
 
-    const tabs = ['Prediction', 'Dashboard', 'Analysis']
-
-    useEffect(() => {
-        window.scrollTo(0, 0)
-    }, [])
+    const tabs = ['Daily new deaths', 'Deaths per million', 'Tests by country', 'Daily new confirmed', 'Speed of growth', 'Symptoms and fatality']
 
     return <>
         <AppBar position="sticky">
@@ -84,15 +82,24 @@ function App() {
             </Tabs>
         </AppBar>
         <TabPanel value={value} index={0}>
-            <Prediction/>
+            <DailyNewDeaths/>
         </TabPanel>
         <TabPanel value={value} index={1}>
-            <Dashboard/>
+            <DeathsPerMillion/>
         </TabPanel>
         <TabPanel value={value} index={2}>
-            <Analysis/>
+            <TestsPerCountry/>
+        </TabPanel>
+        <TabPanel value={value} index={3}>
+            <ConfirmedPerCountry/>
+        </TabPanel>
+        <TabPanel value={value} index={4}>
+            <SpeedOfGrowth/>
+        </TabPanel>
+        <TabPanel value={value} index={5}>
+            <SymptomsAndFatality/>
         </TabPanel>
     </>
 }
 
-export default App;
+export default Analysis;
