@@ -76,7 +76,7 @@ const Transition = React.forwardRef<unknown, TransitionProps>(function Transitio
     return <Slide direction="up" ref={ref} {...props} />;
 });
 
-interface Country {
+export interface Country {
     name: string,
     flag: string
 }
@@ -86,13 +86,30 @@ const countryToEmojiMap = _.map(emojiFlags.data, ({name, emoji}) => ({
     flag: emoji
 } as Country))
 
-export default function AddTabDialog({isOpen, handleSave, handleClose}: { isOpen: boolean, handleSave: (url: string) => void, handleClose: () => void }) {
+export default function AddTabDialog({isOpen, handleSave, handleClose}: { isOpen: boolean, handleSave: (url: string, country: Country) => void, handleClose: () => void }) {
     const classes = useStyles();
 
     const [country, setCountry] = React.useState();
     const [validUrl, setValidUrl] = React.useState();
     const [url, setUrl] = React.useState();
     const [loading, setLoading] = React.useState();
+
+    function resetState() {
+        setCountry(undefined)
+        setValidUrl(undefined)
+        setUrl(undefined)
+        setLoading(undefined)
+    }
+
+    function onDialogClosed() {
+        handleClose()
+        resetState();
+    }
+
+    function onSaveClicked() {
+        handleSave(url, country)
+        resetState();
+    }
 
     function handleCountrySelected({target: {value} = ''}: any) {
         setCountry(_.find(countryToEmojiMap, (v: Country) => v.name === value))
@@ -129,18 +146,17 @@ export default function AddTabDialog({isOpen, handleSave, handleClose}: { isOpen
     }
 
     return (
-        <Dialog onClose={handleClose} aria-labelledby="customized-dialog-title" open={isOpen}
-                TransitionComponent={Transition} keepMounted fullWidth>
-            <DialogTitle id="customized-dialog-title" onClose={handleClose}>
+        <Dialog onClose={onDialogClosed} aria-labelledby="customized-dialog-title" open={isOpen}
+                TransitionComponent={Transition} fullWidth>
+            <DialogTitle id="customized-dialog-title" onClose={onDialogClosed}>
                 Add your website
             </DialogTitle>
             <DialogContent dividers style={{minHeight: 200}}>
                 <Grid container direction={"column"} alignItems="center" justify="center"
                       style={{minHeight: 200}} spacing={2}>
                     <Typography variant={"caption"} style={{margin: 16, textAlign: 'center'}}>
-                        You can add your own country website which you're following.
-                        It will be saved as a bookmark in the top bar of this page.
-                        Feel free to add multiple countries.
+                        Each country has its own country website with more detailed data.
+                        You can add the URL of your favorite website and it will be saved as a bookmark in the top bar of this page.
                     </Typography>
                     <Grid item xs container spacing={1} justify={"center"}>
                         {country && <>
@@ -173,7 +189,7 @@ export default function AddTabDialog({isOpen, handleSave, handleClose}: { isOpen
                                 <CircularProgress size={20}/>
                             </Grid>
                             <Grid item>
-                                <Typography variant={"body1"}>Checking URL status...</Typography>
+                                <Typography variant={"body1"}>Checking inserted URL...</Typography>
                             </Grid>
                         </Grid>
                     </Fade>}
@@ -194,7 +210,7 @@ export default function AddTabDialog({isOpen, handleSave, handleClose}: { isOpen
             </DialogContent>
             {validUrl && !loading &&
             <DialogActions>
-                <Button onClick={() => handleSave(url)} className={classes.saveButton}
+                <Button onClick={onSaveClicked} className={classes.saveButton}
                         variant="contained" color={"secondary"}>Save</Button>
             </DialogActions>}
         </Dialog>
