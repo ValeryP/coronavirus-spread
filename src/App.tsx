@@ -49,7 +49,7 @@ function App() {
 
     const [cookies, setCookie] = useCookies(['saved-prefs']);
     const [value, setValue] = React.useState(Number(cookies['tab-main']) || 0);
-    const [showAddTabDialog, setShowAddTabDialog] = React.useState(false);
+    const [showAddTabDialog, setShowAddTabDialog] = React.useState(true);
 
     const handleChange = (event: React.ChangeEvent<{}>, newValue: number) => {
         setValue(newValue);
@@ -59,8 +59,8 @@ function App() {
         setShowAddTabDialog(true)
     };
 
-    const handleAddTab = () => {
-        console.warn("handleAddTab");
+    const handleAddTab = (url: string) => {
+        console.warn("handleAddTab", url);
         handleAddTabClose()
     };
 
