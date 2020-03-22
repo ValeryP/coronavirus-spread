@@ -1,5 +1,5 @@
 import React from 'react';
-import {AppBar, Box, Tab, Tabs, Typography} from "@material-ui/core";
+import {AppBar, Tab, Tabs} from "@material-ui/core";
 import _ from "lodash";
 import DailyNewDeaths from "./DailyNewDeaths";
 import DeathsPerMillion from "./DeathsPerMillion";
@@ -9,44 +9,10 @@ import SpeedOfGrowth from "./SpeedOfGrowth";
 import SymptomsAndFatality from "./SymptomsAndFatality";
 import ReactGA from "react-ga";
 import {useCookies} from "react-cookie";
-import {createStyles, makeStyles, Theme} from "@material-ui/core/styles";
-
-interface TabPanelProps {
-    children?: React.ReactNode;
-    index: any;
-    value: any;
-}
-
-function TabPanel(props: TabPanelProps) {
-    const {children, value, index, ...other} = props;
-    return (
-        <Typography
-            component="div"
-            role="tabpanel"
-            hidden={value !== index}
-            id={`simple-tabpanel-${index}`}
-            aria-labelledby={`simple-tab-${index}`}
-            {...other}
-        >
-            {value === index && <Box p={0}>{children}</Box>}
-        </Typography>
-    );
-}
-
-const useStyles = makeStyles((theme: Theme) =>
-    createStyles({
-        tabDefault: {
-            color: theme.palette.primary.contrastText,
-            backgroundColor: theme.palette.primary.main
-        },
-        tabSelected: {
-            color: theme.palette.secondary.main,
-        }
-    }),
-);
+import {TabPanel, tabsUseStyles} from "./App";
 
 function Analysis() {
-    const classes = useStyles();
+    const classes = tabsUseStyles();
 
     const [cookies, setCookie] = useCookies(['saved-prefs']);
     const [value, setValue] = React.useState(Number(cookies['tab-analysis']) || 0);

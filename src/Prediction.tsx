@@ -155,7 +155,7 @@ function Prediction() {
                 <InputLabel ref={inputDataTypeLabel}
                             id="select-type-input-id">Type</InputLabel>
                 <Select
-                    labelId="select-type-select-label"
+                    labelId="select-type-select-country"
                     id="select-type-select-id"
                     value={dataType}
                     onChange={handleDataTypeChange}
@@ -176,7 +176,7 @@ function Prediction() {
                 <InputLabel ref={inputCountryLabel}
                             id="select-country-input-id">Location</InputLabel>
                 <Select
-                    labelId="select-country-select-label"
+                    labelId="select-country-select-country"
                     id="select-country-select-id"
                     value={country}
                     onChange={handleCountryChange}
@@ -197,7 +197,7 @@ function Prediction() {
                 <InputLabel ref={inputDaysLabel}
                             id="select-days-input-id">Prediction</InputLabel>
                 <Select
-                    labelId="select-days-select-label"
+                    labelId="select-days-select-country"
                     id="select-days-select-id"
                     value={days}
                     onChange={handleDaysChange}
