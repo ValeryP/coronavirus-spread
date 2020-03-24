@@ -136,7 +136,7 @@ export default function AddTabDialog({isOpen, handleSave, handleClose}: { isOpen
         const corsProxy = 'https://cors-anywhere.herokuapp.com/'
         setLoading(true)
         setUrl(value)
-        fetch(corsProxy + value, {method: 'HEAD'})
+        fetch(corsProxy + value, {method: 'GET'})
             .then((res) => {
                 setValidUrl(res.ok)
             }, (err) => {
