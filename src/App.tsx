@@ -11,6 +11,7 @@ import AddRoundedIcon from '@material-ui/icons/AddRounded';
 import AddTabDialog, {Country} from "./AddTabDialog";
 import moment from "moment";
 import GenericTab from "./GenericTab";
+import {Onboarding} from "./Onboarding";
 
 export interface TabPanelProps {
     children?: React.ReactNode;
@@ -60,6 +61,7 @@ function App() {
     const [cookies, setCookie] = useCookies(['saved-prefs']);
     const [value, setValue] = React.useState(Number(cookies['tab-main']) || 0);
     const [showAddTabDialog, setShowAddTabDialog] = React.useState(false);
+    const [showOnboarding, setShowOnboarding] = React.useState(true);
     const [userTabs, setUserTabsRaw] = React.useState((cookies['user-tabs'] || []) as UserTab[]);
     console.info('raw', userTabs)
 
@@ -108,7 +110,7 @@ function App() {
         return <Tab onClick={() => handleTabClick(name, index)} label={name}
                     className={index === selected ? classes.tabSelected : classes.tabDefault}
                     {...{
-                        id: `simple-tab-${index}`,
+                        className: `simple-tab-${index}`, id: `simple-tab-${index}`,
                         'aria-controls': `simple-tabpanel-${index}`,
                     }} style={{...userTabsStyles}}/>
     }
@@ -121,7 +123,8 @@ function App() {
         <AppBar position="sticky">
             <Tabs value={value} onChange={handleChange} variant="scrollable" scrollButtons="auto">
                 {_.map(tabs, (v, ind) => buildTabTitle(v, ind, value))}
-                <IconButton aria-haspopup="true" color="inherit" onClick={handleAddButtonClick}>
+                <IconButton className={`simple-tab-last`} aria-haspopup="true" color="inherit"
+                            onClick={handleAddButtonClick}>
                     <AddRoundedIcon/>
                 </IconButton>
             </Tabs>
@@ -141,6 +144,8 @@ function App() {
             </TabPanel>)}
         <AddTabDialog isOpen={showAddTabDialog} handleSave={handleAddTab}
                       handleClose={handleAddTabClose}/>
+        <Onboarding run={showOnboarding}/>
+        />
     </>
 }
 

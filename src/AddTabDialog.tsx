@@ -156,7 +156,8 @@ export default function AddTabDialog({isOpen, handleSave, handleClose}: { isOpen
                       style={{minHeight: 200}} spacing={2}>
                     <Typography variant={"caption"} style={{margin: 16, textAlign: 'center'}}>
                         Each country has its own country website with more detailed data.
-                        You can add the URL of your favorite website and it will be saved as a bookmark in the top bar of this page.
+                        You can add the URL of your favorite website and it will be saved as a
+                        bookmark in the top bar of this page.
                     </Typography>
                     <Grid item xs container spacing={1} justify={"center"}>
                         {country && <>
