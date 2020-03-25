@@ -15,9 +15,9 @@ import {createStyles, makeStyles, Theme} from "@material-ui/core/styles";
 import _, {Dictionary} from "lodash";
 import ReactGA from 'react-ga';
 import moment from "moment";
-import {useCookies} from "react-cookie";
 import InfoRoundedIcon from '@material-ui/icons/InfoRounded';
 import ReactHtmlParser from 'react-html-parser';
+import {getStorageState, saveStorageState} from "./Storage";
 
 const {Octokit} = require("@octokit/rest");
 const octokit = new Octokit();
@@ -66,13 +66,14 @@ function Prediction() {
         '3 days': 3,
         '1 week': 7
     }
-    const [cookies, setCookie] = useCookies(['saved-prefs']);
+
+    const storage = getStorageState()
 
     const [labels, setLabels] = useState([] as Date[]);
-    const [country, setCountry] = useState(cookies['country'] || 'Worldwide');
-    const [dataType, setDataType] = useState(cookies['type'] || 'Confirmed');
+    const [country, setCountry] = useState(storage.country);
+    const [dataType, setDataType] = useState(storage.type);
     const [countries, setCountries] = useState([] as string[]);
-    const [days, setDays] = useState(cookies['prediction'] || 1);
+    const [days, setDays] = useState(storage.prediction);
     const [data, setData] = useState([] as any[]);
     const [lastUpdate, setLastUpdate] = useState('');
 
@@ -96,7 +97,7 @@ function Prediction() {
             action: 'Country',
             label: newCountry
         });
-        setCookie('country', newCountry, {path: '/'});
+        saveStorageState({...storage, country: newCountry})
         setCountry(newCountry);
     };
 
@@ -107,7 +108,7 @@ function Prediction() {
             action: 'Range',
             label: _.findKey(newRange)
         });
-        setCookie('prediction', newRange, {path: '/'});
+        saveStorageState({...storage, prediction: newRange})
         setDays(newRange);
     };
 
@@ -118,7 +119,7 @@ function Prediction() {
             action: 'Type',
             label: newType
         });
-        setCookie('type', newType, {path: '/'});
+        saveStorageState({...storage, type: newType})
         setDataType(newType);
     };
 

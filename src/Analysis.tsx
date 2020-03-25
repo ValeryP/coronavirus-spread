@@ -8,15 +8,16 @@ import ConfirmedPerCountry from "./ConfirmedPerCountry";
 import SpeedOfGrowth from "./SpeedOfGrowth";
 import SymptomsAndFatality from "./SymptomsAndFatality";
 import ReactGA from "react-ga";
-import {useCookies} from "react-cookie";
 import {TabPanel, tabsUseStyles} from "./App";
 import EpidemicCalculator from "./EpidemicCalculator";
+import {getStorageState, saveStorageState} from "./Storage";
 
 function Analysis() {
     const classes = tabsUseStyles();
 
-    const [cookies, setCookie] = useCookies(['saved-prefs']);
-    const [value, setValue] = React.useState(Number(cookies['tab-analysis']) || 0);
+    const storage = getStorageState()
+
+    const [value, setValue] = React.useState(storage.tabAnalysis);
 
     const handleChange = (event: React.ChangeEvent<{}>, newValue: number) => {
         setValue(newValue);
@@ -28,7 +29,7 @@ function Analysis() {
             action: 'Tab',
             label: name
         });
-        setCookie('tab-analysis', index, {path: '/'});
+        saveStorageState({...storage, tabAnalysis: index})
     }
 
     function buildTabTitle(name: string, index: number, selected: number) {

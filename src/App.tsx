@@ -4,14 +4,14 @@ import {AppBar, Box, IconButton, Tab, Tabs, Typography} from "@material-ui/core"
 import _ from "lodash";
 import ReactGA from "react-ga";
 import Dashboard from "./Dashboard";
-import {useCookies} from "react-cookie";
 import Analysis from "./Analysis";
 import {createStyles, makeStyles, Theme} from "@material-ui/core/styles";
 import AddRoundedIcon from '@material-ui/icons/AddRounded';
 import AddTabDialog, {Country} from "./AddTabDialog";
 import moment from "moment";
 import GenericTab from "./GenericTab";
-import {Onboarding} from "./Onboarding";
+import {Onboarding, Onboardings} from "./Onboarding";
+import {getStorageState, isWatchedOboarding, saveStorageState, UserTab} from "./Storage";
 
 export interface TabPanelProps {
     children?: React.ReactNode;
@@ -47,26 +47,18 @@ export const tabsUseStyles = makeStyles((theme: Theme) =>
     }),
 );
 
-interface UserTab {
-    index: number,
-    country: string,
-    flag: string,
-    url: string,
-    timestamp: number
-}
 
 function App() {
     const classes = tabsUseStyles();
 
-    const [cookies, setCookie] = useCookies(['saved-prefs']);
-    const [value, setValue] = React.useState(Number(cookies['tab-main']) || 0);
+    const storage = getStorageState()
+
+    const [mainTab, setMainTab] = React.useState(storage.tabMain);
     const [showAddTabDialog, setShowAddTabDialog] = React.useState(false);
-    const [showOnboarding, setShowOnboarding] = React.useState(true);
-    const [userTabs, setUserTabsRaw] = React.useState((cookies['user-tabs'] || []) as UserTab[]);
-    console.info('raw', userTabs)
+    const [userTabs, setUserTabsRaw] = React.useState(storage.userTabs);
 
     const handleChange = (event: React.ChangeEvent<{}>, newValue: number) => {
-        setValue(newValue);
+        setMainTab(newValue);
     };
 
     const handleAddButtonClick = () => {
@@ -82,7 +74,7 @@ function App() {
             timestamp: moment().unix()
         } as UserTab
         const userTabsObj = _.concat(userTabs, [newTab]);
-        setCookie('user-tabs', JSON.stringify(userTabsObj), {path: '/'});
+        saveStorageState({...storage, userTabs: userTabsObj})
         setUserTabsRaw(userTabsObj)
         handleAddTabClose()
     };
@@ -97,7 +89,7 @@ function App() {
             action: 'Tab',
             label: name
         });
-        setCookie('tab-main', index, {path: '/'});
+        saveStorageState({...storage, tabMain: index})
     }
 
     const userTabsTitles = _.map(userTabs, 'flag')
@@ -121,30 +113,30 @@ function App() {
 
     return <>
         <AppBar position="sticky">
-            <Tabs value={value} onChange={handleChange} variant="scrollable" scrollButtons="auto">
-                {_.map(tabs, (v, ind) => buildTabTitle(v, ind, value))}
+            <Tabs value={mainTab} onChange={handleChange} variant="scrollable" scrollButtons="auto">
+                {_.map(tabs, (v, ind) => buildTabTitle(v, ind, mainTab))}
                 <IconButton className={`simple-tab-last`} aria-haspopup="true" color="inherit"
                             onClick={handleAddButtonClick}>
                     <AddRoundedIcon/>
                 </IconButton>
             </Tabs>
         </AppBar>
-        <TabPanel value={value} index={0} key={0}>
+        <TabPanel value={mainTab} index={0} key={0}>
             <Dashboard/>
         </TabPanel>
-        <TabPanel value={value} index={1} key={1}>
+        <TabPanel value={mainTab} index={1} key={1}>
             <Analysis/>
         </TabPanel>
-        <TabPanel value={value} index={2} key={2}>
+        <TabPanel value={mainTab} index={2} key={2}>
             <Prediction/>
         </TabPanel>
         {_.map(userTabs, ({url}, i) =>
-            <TabPanel value={value} index={tabsDefault.length + i} key={tabsDefault.length + i}>
+            <TabPanel value={mainTab} index={tabsDefault.length + i} key={tabsDefault.length + i}>
                 <GenericTab url={url}/>
             </TabPanel>)}
         <AddTabDialog isOpen={showAddTabDialog} handleSave={handleAddTab}
                       handleClose={handleAddTabClose}/>
-        <Onboarding run={showOnboarding}/>
+        <Onboarding run={!isWatchedOboarding(Onboardings.MAIN)} type={Onboardings.MAIN}/>
     </>
 }
 
