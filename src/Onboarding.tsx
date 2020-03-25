@@ -5,8 +5,8 @@ export function Onboarding({run}: { run: boolean }) {
     const steps = [
         {
             target: 'body',
-            content: <p>This is a single website to let you keep all the info about the COVID-19
-                world situation in one place. <strong>Trusted data source. Daily updates.</strong>
+            content: <p>This website lets you keep all the info about the COVID-19 world situation
+                in a single place. <strong>Trusted data source. Daily updates.</strong>
             </p>,
             placement: 'center',
         },
