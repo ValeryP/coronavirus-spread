@@ -101,7 +101,7 @@ function App() {
     }
 
     const userTabsTitles = _.map(userTabs, 'flag')
-    const tabsDefault = ['Prediction', 'Dashboard', 'Analysis']
+    const tabsDefault = ['Dashboard', 'Analysis', 'Prediction']
     const tabs = [...tabsDefault, ...userTabsTitles]
 
     function buildTabTitle(name: string, index: number, selected: number) {
@@ -112,7 +112,7 @@ function App() {
                     {...{
                         className: `simple-tab-${index}`, id: `simple-tab-${index}`,
                         'aria-controls': `simple-tabpanel-${index}`,
-                    }} style={{...userTabsStyles}}/>
+                    }} style={{...userTabsStyles}} key={index}/>
     }
 
     useEffect(() => {
@@ -129,23 +129,22 @@ function App() {
                 </IconButton>
             </Tabs>
         </AppBar>
-        <TabPanel value={value} index={0}>
-            <Prediction/>
-        </TabPanel>
-        <TabPanel value={value} index={1}>
+        <TabPanel value={value} index={0} key={0}>
             <Dashboard/>
         </TabPanel>
-        <TabPanel value={value} index={2}>
+        <TabPanel value={value} index={1} key={1}>
             <Analysis/>
         </TabPanel>
+        <TabPanel value={value} index={2} key={2}>
+            <Prediction/>
+        </TabPanel>
         {_.map(userTabs, ({url}, i) =>
-            <TabPanel value={value} index={tabsDefault.length + i}>
+            <TabPanel value={value} index={tabsDefault.length + i} key={tabsDefault.length + i}>
                 <GenericTab url={url}/>
             </TabPanel>)}
         <AddTabDialog isOpen={showAddTabDialog} handleSave={handleAddTab}
                       handleClose={handleAddTabClose}/>
         <Onboarding run={showOnboarding}/>
-        />
     </>
 }
 

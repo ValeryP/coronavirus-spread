@@ -12,18 +12,18 @@ export function Onboarding({run}: { run: boolean }) {
         },
         {
             target: '.simple-tab-0',
-            content: <p>"Prediction" chart shows <strong>how the disease will spread</strong> in
-                each country.</p>,
-        },
-        {
-            target: '.simple-tab-1',
-            content: <p>"Dashboard" is the most reliable <strong>map that contains all
+            content: <p><u>Dashboard</u> has the most reliable <strong>map that contains all
                 countries</strong>' data.</p>,
         },
         {
-            target: '.simple-tab-2',
-            content: <p>"Analysis" has <strong>detailed charts</strong> with granularly picked
+            target: '.simple-tab-1',
+            content: <p><u>Analysis</u> has <strong>detailed charts</strong> with granularly picked
                 scientific data.</p>,
+        },
+        {
+            target: '.simple-tab-2',
+            content: <p><u>Prediction</u> chart shows <strong>how the disease will
+                spread</strong> in each country.</p>,
         },
         {
             target: '.simple-tab-last',
