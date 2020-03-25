@@ -10,6 +10,7 @@ import SymptomsAndFatality from "./SymptomsAndFatality";
 import ReactGA from "react-ga";
 import {useCookies} from "react-cookie";
 import {TabPanel, tabsUseStyles} from "./App";
+import EpidemicCalculator from "./EpidemicCalculator";
 
 function Analysis() {
     const classes = tabsUseStyles();
@@ -39,7 +40,8 @@ function Analysis() {
                     }} />
     }
 
-    const tabs = ['Daily new deaths', 'Deaths per million', 'Tests by country', 'Daily new confirmed', 'Speed of growth', 'Symptoms and fatality']
+    const tabs = ['Daily new deaths', 'Deaths per million', 'Tests by country',
+        'Daily new confirmed', 'Speed of growth', 'Epidemic Calculator', 'Symptoms and fatality']
 
     return <>
         <AppBar position="sticky">
@@ -63,6 +65,9 @@ function Analysis() {
             <SpeedOfGrowth/>
         </TabPanel>
         <TabPanel value={value} index={5}>
+            <EpidemicCalculator/>
+        </TabPanel>
+        <TabPanel value={value} index={6}>
             <SymptomsAndFatality/>
         </TabPanel>
     </>
