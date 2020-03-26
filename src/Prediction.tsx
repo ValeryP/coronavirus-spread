@@ -54,7 +54,7 @@ const useStyles = makeStyles((theme: Theme) =>
 
 function Prediction() {
     const classes = useStyles();
-    const baseUrl = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-";
+    const baseUrl = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_";
     const types = {
         'Confirmed': '#f57c00',
         'Deaths': '#FC562E',
@@ -124,7 +124,7 @@ function Prediction() {
     };
 
     const loadData = () => {
-        Papa.parse(baseUrl + dataType + '.csv', {
+        Papa.parse(baseUrl + dataType.toLowerCase() + '_global.csv', {
             skipEmptyLines: true, header: true, download: true, delimiter: ',',
             complete: function (results) {
                 let data = results.data;
