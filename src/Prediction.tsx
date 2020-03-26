@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import Papa from 'papaparse';
-import Chart from "./Chart";
+import PredictionChart from "./PredictionChart";
 import {
     Fade,
     FormControl,
@@ -348,9 +348,9 @@ function Prediction() {
                         </Grid>
                     </Grid>
                     <Grid item>
-                        <Chart labelsPlot={labelsPlot} dataExistingPlot={dataExistingPlot}
-                               dataPredictedPlot={dataPredictedPlot} country={country}
-                               color={color}/>
+                        <PredictionChart labelsPlot={labelsPlot} dataExistingPlot={dataExistingPlot}
+                                         dataPredictedPlot={dataPredictedPlot} country={country}
+                                         color={color}/>
                     </Grid>
                 </>
             )
