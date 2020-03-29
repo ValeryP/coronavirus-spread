@@ -4,7 +4,7 @@ import {getStorageState, saveStorageState} from "./Storage";
 import _ from "lodash";
 
 export enum Onboardings {
-    MAIN
+    MAIN, USER_TABS_ACTIONS
 }
 
 export function Onboarding({run, type}: { run: boolean, type: Onboardings }) {
@@ -40,6 +40,14 @@ export function Onboarding({run, type}: { run: boolean, type: Onboardings }) {
                     check</strong> and
                     it will be saved as an icon in the top bar of this page.</p>,
             },
+        ] as Step[],
+        USER_TABS_ACTIONS: [
+            {
+                target: '.simple-tab-3',
+                content: <p>Now you can click the right button of the mouse
+                    to <strong>edit</strong> or <strong>remove</strong> the tab you previously
+                    created.</p>,
+            }
         ] as Step[]
     }
 
@@ -57,7 +65,16 @@ export function Onboarding({run, type}: { run: boolean, type: Onboardings }) {
 
 
     let steps = STEPS.MAIN;
-
+    if (type === Onboardings.USER_TABS_ACTIONS) {
+        steps = STEPS.USER_TABS_ACTIONS;
+    }
     return <Joyride continuous={true} run={run} showSkipButton={true} steps={steps}
-                    styles={{options: {zIndex: 10000}}} callback={handleJoyrideCallback}/>
+                    locale={{
+                        back: 'Back',
+                        close: 'Close',
+                        last: 'OK',
+                        next: 'Next',
+                        skip: 'Skip'
+                    }}
+                    styles={{options: {zIndex: 10000}}} callback={handleJoyrideCallback}/>;
 }

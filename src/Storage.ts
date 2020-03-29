@@ -81,8 +81,14 @@ export function saveStorageState(data: StorageState) {
     store.set(WATCHED_ONBOARDINGS, data.watchedOnboardings);
 }
 
-export function isWatchedOboarding(onboarding: Onboardings) {
-    return _.indexOf(getStorageState().watchedOnboardings, onboarding) >= 0
+export function shouldWatchOboarding(onboarding: Onboardings): boolean {
+    const isAlreadyWatched = _.indexOf(getStorageState().watchedOnboardings, onboarding) >= 0;
+    if (onboarding === Onboardings.MAIN) {
+        return !isAlreadyWatched
+    } else if (onboarding === Onboardings.USER_TABS_ACTIONS) {
+        return !isAlreadyWatched && !shouldWatchOboarding(Onboardings.MAIN)
+    }
+    return false
 }
 
 

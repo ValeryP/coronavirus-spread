@@ -11,7 +11,7 @@ import AddTabDialog, {Country} from "./AddTabDialog";
 import moment from "moment";
 import GenericTab from "./GenericTab";
 import {Onboarding, Onboardings} from "./Onboarding";
-import {getStorageState, isWatchedOboarding, saveStorageState, UserTab} from "./Storage";
+import {getStorageState, saveStorageState, shouldWatchOboarding, UserTab} from "./Storage";
 
 export interface TabPanelProps {
     children?: React.ReactNode;
@@ -50,10 +50,8 @@ export const tabsUseStyles = makeStyles((theme: Theme) =>
 function App() {
     const classes = tabsUseStyles();
 
-    const storage = getStorageState()
-
-    const [mainTab, setMainTab] = React.useState(storage.tabMain);
-    const [userTabs, setUserTabsRaw] = React.useState(storage.userTabs);
+    const [mainTab, setMainTab] = React.useState(getStorageState().tabMain);
+    const [userTabs, setUserTabsRaw] = React.useState(getStorageState().userTabs);
     const [editTab, setEditTab] = React.useState();
     const [showAddTabDialog, setShowAddTabDialog] = React.useState(false);
 
@@ -78,7 +76,7 @@ function App() {
             timestamp: moment().unix()
         } as UserTab
         const userTabsObj = _.concat(userTabs, [newTab]);
-        saveStorageState({...storage, userTabs: userTabsObj})
+        saveStorageState({...getStorageState(), userTabs: userTabsObj})
         setUserTabsRaw(userTabsObj)
         setMainTab(tabs.length);
         handleAddTabClose()
@@ -87,7 +85,7 @@ function App() {
     const handleEditTab = (tab: UserTab) => {
         const index = _.findIndex(userTabs, (v) => v.index === tab.index);
         const newTabs = _.concat(_.slice(userTabs, 0, index), [tab], _.slice(userTabs, index + 1));
-        saveStorageState({...storage, userTabs: newTabs})
+        saveStorageState({...getStorageState(), userTabs: newTabs})
         setUserTabsRaw(newTabs)
         setMainTab(tabsDefault.length + index);
         handleAddTabClose()
@@ -95,7 +93,7 @@ function App() {
 
     const handleRemoveTab = (tab: UserTab) => {
         const newTabs = userTabs.filter(item => item.index !== tab.index)
-        saveStorageState({...storage, userTabs: newTabs})
+        saveStorageState({...getStorageState(), userTabs: newTabs})
         setUserTabsRaw(newTabs)
         setMainTab(tabsDefault.length);
         handleAddTabClose()
@@ -113,7 +111,7 @@ function App() {
                 action: 'Tab',
                 label: name
             });
-            saveStorageState({...storage, tabMain: index})
+            saveStorageState({...getStorageState(), tabMain: index})
         } else if (event.type === 'contextmenu') {
             event.preventDefault();
             setEditTab(userTabs[index - tabsDefault.length])
@@ -170,7 +168,9 @@ function App() {
                       handleClose={handleAddTabClose}
                       handleRemove={handleRemoveTab}/>
         }
-        <Onboarding run={!isWatchedOboarding(Onboardings.MAIN)} type={Onboardings.MAIN}/>
+        <Onboarding run={shouldWatchOboarding(Onboardings.MAIN)} type={Onboardings.MAIN}/>
+        <Onboarding run={shouldWatchOboarding(Onboardings.USER_TABS_ACTIONS)}
+                    type={Onboardings.USER_TABS_ACTIONS}/>
     </>
 }
 
