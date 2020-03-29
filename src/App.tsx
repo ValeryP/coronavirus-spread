@@ -47,15 +47,19 @@ export const tabsUseStyles = makeStyles((theme: Theme) =>
     }),
 );
 
-
 function App() {
     const classes = tabsUseStyles();
 
     const storage = getStorageState()
 
     const [mainTab, setMainTab] = React.useState(storage.tabMain);
-    const [showAddTabDialog, setShowAddTabDialog] = React.useState(false);
     const [userTabs, setUserTabsRaw] = React.useState(storage.userTabs);
+    const [editTab, setEditTab] = React.useState();
+    const [showAddTabDialog, setShowAddTabDialog] = React.useState(false);
+
+    const userTabsTitles = _.map(userTabs, 'flag')
+    const tabsDefault = ['Dashboard', 'Analysis', 'Prediction']
+    const tabs = [...tabsDefault, ...userTabsTitles]
 
     const handleChange = (event: React.ChangeEvent<{}>, newValue: number) => {
         setMainTab(newValue);
@@ -76,35 +80,59 @@ function App() {
         const userTabsObj = _.concat(userTabs, [newTab]);
         saveStorageState({...storage, userTabs: userTabsObj})
         setUserTabsRaw(userTabsObj)
+        setMainTab(tabs.length);
+        handleAddTabClose()
+    };
+
+    const handleEditTab = (tab: UserTab) => {
+        const index = _.findIndex(userTabs, (v) => v.index === tab.index);
+        const newTabs = _.concat(_.slice(userTabs, 0, index), [tab], _.slice(userTabs, index + 1));
+        saveStorageState({...storage, userTabs: newTabs})
+        setUserTabsRaw(newTabs)
+        setMainTab(tabsDefault.length + index);
+        handleAddTabClose()
+    };
+
+    const handleRemoveTab = (tab: UserTab) => {
+        const newTabs = userTabs.filter(item => item.index !== tab.index)
+        saveStorageState({...storage, userTabs: newTabs})
+        setUserTabsRaw(newTabs)
+        setMainTab(tabsDefault.length);
         handleAddTabClose()
     };
 
     const handleAddTabClose = () => {
-        setShowAddTabDialog(false)
+        setShowAddTabDialog(false);
+        setEditTab(undefined);
     };
 
-    function handleTabClick(name: string, index: number) {
-        ReactGA.event({
-            category: 'Click',
-            action: 'Tab',
-            label: name
-        });
-        saveStorageState({...storage, tabMain: index})
+    function handleTabClick(event: React.MouseEvent<HTMLDivElement, MouseEvent>, name: string, index: number) {
+        if (event.type === 'click') {
+            ReactGA.event({
+                category: 'Click',
+                action: 'Tab',
+                label: name
+            });
+            saveStorageState({...storage, tabMain: index})
+        } else if (event.type === 'contextmenu') {
+            event.preventDefault();
+            setEditTab(userTabs[index - tabsDefault.length])
+            setShowAddTabDialog(true)
+        }
     }
-
-    const userTabsTitles = _.map(userTabs, 'flag')
-    const tabsDefault = ['Dashboard', 'Analysis', 'Prediction']
-    const tabs = [...tabsDefault, ...userTabsTitles]
 
     function buildTabTitle(name: string, index: number, selected: number) {
         const isUserTab = index > tabsDefault.length - 1;
         const userTabsStyles = isUserTab ? {fontSize: '1.3rem', minWidth: 64} : {};
-        return <Tab onClick={() => handleTabClick(name, index)} label={name}
-                    className={index === selected ? classes.tabSelected : classes.tabDefault}
-                    {...{
-                        className: `simple-tab-${index}`, id: `simple-tab-${index}`,
-                        'aria-controls': `simple-tabpanel-${index}`,
-                    }} style={{...userTabsStyles}} key={index}/>
+        return <Tab
+            onContextMenu={event => handleTabClick(event, name, index)}
+            onClick={event => handleTabClick(event, name, index)}
+            className={index === selected ? classes.tabSelected : classes.tabDefault}
+            label={name} style={{...userTabsStyles}} key={index}
+            {...{
+                className: `simple-tab-${index}`, id: `simple-tab-${index}`,
+                'aria-controls': `simple-tabpanel-${index}`,
+            }}/>;
     }
 
     useEffect(() => {
@@ -134,8 +162,14 @@ function App() {
             <TabPanel value={mainTab} index={tabsDefault.length + i} key={tabsDefault.length + i}>
                 <GenericTab url={url}/>
             </TabPanel>)}
-        <AddTabDialog isOpen={showAddTabDialog} handleSave={handleAddTab}
-                      handleClose={handleAddTabClose}/>
+        {showAddTabDialog &&
+        <AddTabDialog isOpen={showAddTabDialog}
+                      editTab={editTab}
+                      handleSave={handleAddTab}
+                      handleEdit={handleEditTab}
+                      handleClose={handleAddTabClose}
+                      handleRemove={handleRemoveTab}/>
+        }
         <Onboarding run={!isWatchedOboarding(Onboardings.MAIN)} type={Onboardings.MAIN}/>
     </>
 }

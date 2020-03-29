@@ -13,6 +13,7 @@ import _ from "lodash";
 import {CircularProgress, Fade, Grid, Slide, TextField, Zoom} from "@material-ui/core";
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import {TransitionProps} from "@material-ui/core/transitions";
+import {UserTab} from "./Storage";
 
 const styles = (theme: Theme) => createStyles({
     root: {
@@ -86,17 +87,20 @@ const countryToEmojiMap = _.map(emojiFlags.data, ({name, emoji}) => ({
     flag: emoji
 } as Country))
 
-export default function AddTabDialog({isOpen, handleSave, handleClose}: { isOpen: boolean, handleSave: (url: string, country: Country) => void, handleClose: () => void }) {
+export default function AddTabDialog({isOpen, editTab, handleSave, handleClose, handleEdit, handleRemove}: { isOpen: boolean, editTab: UserTab, handleSave: (url: string, country: Country) => void, handleClose: () => void, handleRemove: (tab: UserTab) => void, handleEdit: (tab: UserTab) => void }) {
     const classes = useStyles();
+    const [country, setCountry] = React.useState(editTab ? {
+        name: editTab.country,
+        flag: editTab.flag
+    } as Country : undefined);
 
-    const [country, setCountry] = React.useState();
-    const [validUrl, setValidUrl] = React.useState();
-    const [url, setUrl] = React.useState();
+    const [validUrl, setValidUrl] = React.useState(!!editTab);
+    const [url, setUrl] = React.useState(editTab ? editTab.url : undefined);
     const [loading, setLoading] = React.useState();
 
     function resetState() {
         setCountry(undefined)
-        setValidUrl(undefined)
+        setValidUrl(false)
         setUrl(undefined)
         setLoading(undefined)
     }
@@ -107,11 +111,20 @@ export default function AddTabDialog({isOpen, handleSave, handleClose}: { isOpen
     }
 
     function onSaveClicked() {
-        handleSave(url, country)
+        if (!!editTab) {
+            handleEdit({...editTab, url: url!!, country: country?.name!!, flag: country?.flag!!})
+        } else {
+            handleSave(url!!, country!!);
+        }
         resetState();
     }
 
-    function handleCountrySelected({target: {value} = ''}: any) {
+    function onRemoveClicked() {
+        handleRemove(editTab);
+        resetState();
+    }
+
+    function handleCountrySelected({target: {value}}: any) {
         setCountry(_.find(countryToEmojiMap, (v: Country) => v.name === value))
     }
 
@@ -120,6 +133,7 @@ export default function AddTabDialog({isOpen, handleSave, handleClose}: { isOpen
             id="country-select"
             style={{width: 300}}
             options={countryToEmojiMap}
+            defaultValue={country}
             autoHighlight
             onSelect={handleCountrySelected}
             getOptionLabel={option => option.name}
@@ -149,7 +163,7 @@ export default function AddTabDialog({isOpen, handleSave, handleClose}: { isOpen
         <Dialog onClose={onDialogClosed} aria-labelledby="customized-dialog-title" open={isOpen}
                 TransitionComponent={Transition} fullWidth>
             <DialogTitle id="customized-dialog-title" onClose={onDialogClosed}>
-                Add your website
+                {editTab ? "Edit" : "Add"} your website
             </DialogTitle>
             <DialogContent dividers style={{minHeight: 200}}>
                 <Grid container direction={"column"} alignItems="center" justify="center"
@@ -160,9 +174,9 @@ export default function AddTabDialog({isOpen, handleSave, handleClose}: { isOpen
                         bookmark in the top bar of this page.
                     </Typography>
                     <Grid item xs container spacing={1} justify={"center"}>
-                        {country && <>
+                        {!!country && <>
                             <Grid item xs={2} style={{textAlign: 'end'}}>
-                                <Zoom in={country}>
+                                <Zoom in={!!country}>
                                     <Typography variant={"h3"}>
                                         <span aria-label={"flag " + country.name} role={"img"}>
                                             {country?.flag}
@@ -175,9 +189,9 @@ export default function AddTabDialog({isOpen, handleSave, handleClose}: { isOpen
                             {buildAutocomplete()}
                         </Grid>
                     </Grid>
-                    {country &&
+                    {!!country &&
                     <Grid item style={{width: '100%'}}>
-                        <TextField fullWidth variant="outlined"
+                        <TextField fullWidth variant="outlined" value={url}
                                    label="Insert URL of your website"
                                    onChange={handleUrlChange}/>
                     </Grid>}
@@ -194,7 +208,7 @@ export default function AddTabDialog({isOpen, handleSave, handleClose}: { isOpen
                             </Grid>
                         </Grid>
                     </Fade>}
-                    {!loading && url && (validUrl
+                    {!loading && !!url && (validUrl
                         ? <Grid item style={{width: '100%'}} container justify={"center"}>
                             <Typography variant={"body1"} className={classes.textSuccess}>
                                 <span aria-label={"happy"} role={"img"}>😊</span>
@@ -211,6 +225,8 @@ export default function AddTabDialog({isOpen, handleSave, handleClose}: { isOpen
             </DialogContent>
             {validUrl && !loading &&
             <DialogActions>
+                {!!editTab &&
+                <Button onClick={onRemoveClicked} className={classes.saveButton}>Remove</Button>}
                 <Button onClick={onSaveClicked} className={classes.saveButton}
                         variant="contained" color={"secondary"}>Save</Button>
             </DialogActions>}
