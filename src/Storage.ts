@@ -71,9 +71,13 @@ export function getStorageState() {
 }
 
 export function saveStorageState(data: StorageState) {
+    function reindex(userTabs: UserTab[]) {
+        return _.map(userTabs, (v: UserTab, i: number) => ({...v, index: i}))
+    }
+
     store.set(IS_MIGRATED, data.isMigrated);
     store.set(TAB_MAIN, data.tabMain);
-    store.set(USER_TABS, JSON.stringify(data.userTabs));
+    store.set(USER_TABS, JSON.stringify(reindex(data.userTabs)));
     store.set(TAB_ANALYSIS, data.tabAnalysis);
     store.set(COUNTRY, data.country);
     store.set(PREDICTION, data.prediction);

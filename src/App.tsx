@@ -65,13 +65,23 @@ function App() {
     useEffect(() => {
         window.scrollTo(0, 0);
         importUserTabFromUrl();
-        // const newUrl= replaceQuery({a: '1'})
-        // if (window.location.href !== newUrl) {
-        //     window.location.href = replaceQuery({a: '1'})
-        // }
     }, []);
 
     function importUserTabFromUrl() {
+        function parseQuery(url: string = window.location.href): any {
+            const queryString = url.split('?')[1];
+            const query = {};
+            if (queryString) {
+                const pairs = (queryString[0] === '?' ? queryString.substr(1) : queryString).split('&');
+                for (let i = 0; i < pairs.length; i++) {
+                    const pair = pairs[i].split('=');
+                    // @ts-ignore
+                    query[pair[0]] = pair[1] || '';
+                }
+            }
+            return query;
+        }
+
         const {queryCountry, queryflag, queryUrl} = parseQuery();
         if (!!queryUrl) {
             const queryTabIndex = _.findIndex(userTabs, {'url': queryUrl});
@@ -81,32 +91,33 @@ function App() {
                 validateURL(queryUrl).then(isValid => {
                     if (isValid) {
                         handleAddTab(queryUrl, {name: queryCountry, flag: decodeURI(queryflag)});
+                    } else {
+                        console.error('invalid URL: ', queryUrl)
                     }
                 });
             }
         }
     }
 
-    function parseQuery(url: string = window.location.href): any {
-        const queryString = url.split('?')[1];
-        const query = {};
-        if (queryString) {
-            const pairs = (queryString[0] === '?' ? queryString.substr(1) : queryString).split('&');
-            for (let i = 0; i < pairs.length; i++) {
-                const pair = pairs[i].split('=');
-                // @ts-ignore
-                query[pair[0]] = pair[1] || '';
-            }
-        }
-        return query;
-    }
-
-    function replaceQuery(query: any, url: string = window.location.href): string {
-        return url.split('?')[0] + '?' + Object.keys(query).map(k => `${k}=${query[k]}`).join('&')
-    }
-
     const handleChange = (event: React.ChangeEvent<{}>, newValue: number) => {
-        setMainTab(newValue);
+        function replaceQuery(query: any, url: string = window.location.href): string {
+            return url.split('?')[0] + '?' + Object.keys(query).map(k => `${k}=${query[k]}`).join('&')
+        }
+
+        if (newValue >= tabsDefault.length) {
+            const queryTab = _.find(userTabs, {'index': newValue - tabsDefault.length}) as UserTab;
+            const newUrl = replaceQuery({
+                queryCountry: queryTab.country,
+                queryflag: queryTab.flag,
+                queryUrl: queryTab.url
+            })
+            if (window.location.href !== newUrl) {
+                window.location.href = newUrl
+            }
+        } else {
+            setMainTab(newValue);
+            window.location.href = window.location.href.split('?')[0]
+        }
     };
 
     const handleAddButtonClick = () => {
@@ -142,7 +153,7 @@ function App() {
         const newTabs = userTabs.filter(item => item.index !== tab.index)
         saveStorageState({...getStorageState(), userTabs: newTabs})
         setUserTabsRaw(newTabs)
-        setMainTab(tabsDefault.length);
+        setMainTab(newTabs.length > 0 ? tabsDefault.length : 0);
         handleAddTabClose()
     };
 
