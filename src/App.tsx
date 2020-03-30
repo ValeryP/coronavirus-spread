@@ -1,6 +1,6 @@
 import React, {useEffect} from 'react';
 import Prediction from "./Prediction";
-import {AppBar, Box, IconButton, Tab, Tabs, Typography} from "@material-ui/core";
+import {AppBar, Box, IconButton, Snackbar, Tab, Tabs, Typography} from "@material-ui/core";
 import _ from "lodash";
 import ReactGA from "react-ga";
 import Dashboard from "./Dashboard";
@@ -12,6 +12,8 @@ import moment from "moment";
 import GenericTab from "./GenericTab";
 import {Onboarding, Onboardings} from "./Onboarding";
 import {getStorageState, saveStorageState, shouldWatchOboarding, UserTab} from "./Storage";
+import {validateURL} from "./URLValidator";
+import {Alert} from "@material-ui/lab";
 
 export interface TabPanelProps {
     children?: React.ReactNode;
@@ -54,10 +56,54 @@ function App() {
     const [userTabs, setUserTabsRaw] = React.useState(getStorageState().userTabs);
     const [editTab, setEditTab] = React.useState();
     const [showAddTabDialog, setShowAddTabDialog] = React.useState(false);
+    const [showSnackbar, setShowSnackbar] = React.useState();
 
     const userTabsTitles = _.map(userTabs, 'flag')
     const tabsDefault = ['Dashboard', 'Analysis', 'Prediction']
     const tabs = [...tabsDefault, ...userTabsTitles]
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+        importUserTabFromUrl();
+        // const newUrl= replaceQuery({a: '1'})
+        // if (window.location.href !== newUrl) {
+        //     window.location.href = replaceQuery({a: '1'})
+        // }
+    }, []);
+
+    function importUserTabFromUrl() {
+        const {queryCountry, queryflag, queryUrl} = parseQuery();
+        if (!!queryUrl) {
+            const queryTabIndex = _.findIndex(userTabs, {'url': queryUrl});
+            if (queryTabIndex >= 0) {
+                if (mainTab !== queryTabIndex) setMainTab(queryTabIndex + tabsDefault.length);
+            } else {
+                validateURL(queryUrl).then(isValid => {
+                    if (isValid) {
+                        handleAddTab(queryUrl, {name: queryCountry, flag: decodeURI(queryflag)});
+                    }
+                });
+            }
+        }
+    }
+
+    function parseQuery(url: string = window.location.href): any {
+        const queryString = url.split('?')[1];
+        const query = {};
+        if (queryString) {
+            const pairs = (queryString[0] === '?' ? queryString.substr(1) : queryString).split('&');
+            for (let i = 0; i < pairs.length; i++) {
+                const pair = pairs[i].split('=');
+                // @ts-ignore
+                query[pair[0]] = pair[1] || '';
+            }
+        }
+        return query;
+    }
+
+    function replaceQuery(query: any, url: string = window.location.href): string {
+        return url.split('?')[0] + '?' + Object.keys(query).map(k => `${k}=${query[k]}`).join('&')
+    }
 
     const handleChange = (event: React.ChangeEvent<{}>, newValue: number) => {
         setMainTab(newValue);
@@ -76,10 +122,11 @@ function App() {
             timestamp: moment().unix()
         } as UserTab
         const userTabsObj = _.concat(userTabs, [newTab]);
-        saveStorageState({...getStorageState(), userTabs: userTabsObj})
-        setUserTabsRaw(userTabsObj)
+        saveStorageState({...getStorageState(), userTabs: userTabsObj});
+        setUserTabsRaw(userTabsObj);
         setMainTab(tabs.length);
-        handleAddTabClose()
+        handleAddTabClose();
+        setShowSnackbar(true);
     };
 
     const handleEditTab = (tab: UserTab) => {
@@ -133,10 +180,6 @@ function App() {
             }}/>;
     }
 
-    useEffect(() => {
-        window.scrollTo(0, 0)
-    }, [])
-
     return <>
         <AppBar position="sticky">
             <Tabs value={mainTab} onChange={handleChange} variant="scrollable" scrollButtons="auto">
@@ -171,6 +214,12 @@ function App() {
         <Onboarding run={shouldWatchOboarding(Onboardings.MAIN)} type={Onboardings.MAIN}/>
         <Onboarding run={shouldWatchOboarding(Onboardings.USER_TABS_ACTIONS)}
                     type={Onboardings.USER_TABS_ACTIONS}/>
+        <Snackbar open={showSnackbar} autoHideDuration={5000}
+                  onClose={() => setShowSnackbar(false)}>
+            <Alert onClose={() => setShowSnackbar(false)} severity="success">
+                New page successfully added to the tab panel!
+            </Alert>
+        </Snackbar>
     </>
 }
 

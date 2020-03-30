@@ -14,6 +14,7 @@ import {CircularProgress, Fade, Grid, Slide, TextField, Zoom} from "@material-ui
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import {TransitionProps} from "@material-ui/core/transitions";
 import {UserTab} from "./Storage";
+import {validateURL} from "./URLValidator";
 
 const styles = (theme: Theme) => createStyles({
     root: {
@@ -147,15 +148,10 @@ export default function AddTabDialog({isOpen, editTab, handleSave, handleClose, 
     }
 
     function handleUrlChange({target: {value}}: any) {
-        const corsProxy = 'https://cors-anywhere.herokuapp.com/'
         setLoading(true)
         setUrl(value)
-        fetch(corsProxy + value, {method: 'GET'})
-            .then((res) => {
-                setValidUrl(res.ok)
-            }, (err) => {
-                console.error(err)
-            })
+        validateURL(value)
+            .then(setValidUrl)
             .then(() => setTimeout(() => setLoading(false), 2000))
     }
 
