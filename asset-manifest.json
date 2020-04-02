@@ -1,19 +1,19 @@
 {
   "files": {
-    "main.js": "/coronavirus-spread/static/js/main.d675c905.chunk.js",
-    "main.js.map": "/coronavirus-spread/static/js/main.d675c905.chunk.js.map",
+    "main.js": "/coronavirus-spread/static/js/main.b6092cd6.chunk.js",
+    "main.js.map": "/coronavirus-spread/static/js/main.b6092cd6.chunk.js.map",
     "runtime-main.js": "/coronavirus-spread/static/js/runtime-main.fe16824a.js",
     "runtime-main.js.map": "/coronavirus-spread/static/js/runtime-main.fe16824a.js.map",
     "static/js/2.949012a4.chunk.js": "/coronavirus-spread/static/js/2.949012a4.chunk.js",
     "static/js/2.949012a4.chunk.js.map": "/coronavirus-spread/static/js/2.949012a4.chunk.js.map",
     "index.html": "/coronavirus-spread/index.html",
-    "precache-manifest.fff41c3297b9de6f35be9fe2415ede91.js": "/coronavirus-spread/precache-manifest.fff41c3297b9de6f35be9fe2415ede91.js",
+    "precache-manifest.71d9681e28d70858b51894c4a484fcbe.js": "/coronavirus-spread/precache-manifest.71d9681e28d70858b51894c4a484fcbe.js",
     "service-worker.js": "/coronavirus-spread/service-worker.js",
     "static/js/2.949012a4.chunk.js.LICENSE.txt": "/coronavirus-spread/static/js/2.949012a4.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
     "static/js/runtime-main.fe16824a.js",
     "static/js/2.949012a4.chunk.js",
-    "static/js/main.d675c905.chunk.js"
+    "static/js/main.b6092cd6.chunk.js"
   ]
 }
