@@ -17,7 +17,7 @@ import ReactGA from 'react-ga';
 import moment from "moment";
 import InfoRoundedIcon from '@material-ui/icons/InfoRounded';
 import ReactHtmlParser from 'react-html-parser';
-import {getStorageState, saveStorageState} from "./Storage";
+import {getStorageState, saveStorageState} from "../../utils/Storage";
 
 const {Octokit} = require("@octokit/rest");
 const octokit = new Octokit();

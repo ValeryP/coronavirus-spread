@@ -8,9 +8,9 @@ import ConfirmedPerCountry from "./ConfirmedPerCountry";
 import SpeedOfGrowth from "./SpeedOfGrowth";
 import SymptomsAndFatality from "./SymptomsAndFatality";
 import ReactGA from "react-ga";
-import {TabPanel, tabsUseStyles} from "./App";
+import {TabPanel, tabsUseStyles} from "../App";
 import EpidemicCalculator from "./EpidemicCalculator";
-import {getStorageState, saveStorageState} from "./Storage";
+import {getStorageState, saveStorageState} from "../../utils/Storage";
 
 function Analysis() {
     const classes = tabsUseStyles();

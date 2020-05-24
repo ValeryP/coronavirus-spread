@@ -13,8 +13,8 @@ import _ from "lodash";
 import {CircularProgress, Fade, Grid, Slide, TextField, Zoom} from "@material-ui/core";
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import {TransitionProps} from "@material-ui/core/transitions";
-import {UserTab} from "./Storage";
-import {validateURL} from "./URLValidator";
+import {UserTab} from "../utils/Storage";
+import {validateURL} from "../utils/URLValidator";
 
 const styles = (theme: Theme) => createStyles({
     root: {

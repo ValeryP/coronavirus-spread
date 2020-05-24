@@ -1,5 +1,5 @@
 import store from "store";
-import {Onboardings} from "./Onboarding";
+import {Onboardings} from "../components/Onboarding";
 import _ from "lodash";
 
 export interface StorageState {

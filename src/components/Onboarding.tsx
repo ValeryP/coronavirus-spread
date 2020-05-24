@@ -1,6 +1,6 @@
 import Joyride, {STATUS, Step} from "react-joyride";
 import React from "react";
-import {getStorageState, saveStorageState} from "./Storage";
+import {getStorageState, saveStorageState} from "../utils/Storage";
 import _ from "lodash";
 
 export enum Onboardings {

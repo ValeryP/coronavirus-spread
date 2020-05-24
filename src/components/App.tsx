@@ -1,18 +1,18 @@
 import React, {useEffect} from 'react';
-import Prediction from "./Prediction";
+import Prediction from "./prediction/Prediction";
 import {AppBar, Box, IconButton, Snackbar, Tab, Tabs, Typography} from "@material-ui/core";
 import _ from "lodash";
 import ReactGA from "react-ga";
-import Dashboard from "./Dashboard";
-import Analysis from "./Analysis";
+import Dashboard from "./dashboard/Dashboard";
+import Analysis from "./analysis/Analysis";
 import {createStyles, makeStyles, Theme} from "@material-ui/core/styles";
 import AddRoundedIcon from '@material-ui/icons/AddRounded';
 import AddTabDialog, {Country} from "./AddTabDialog";
 import moment from "moment";
 import GenericTab from "./GenericTab";
 import {Onboarding, Onboardings} from "./Onboarding";
-import {getStorageState, saveStorageState, shouldWatchOboarding, UserTab} from "./Storage";
-import {validateURL} from "./URLValidator";
+import {getStorageState, saveStorageState, shouldWatchOboarding, UserTab} from "../utils/Storage";
+import {validateURL} from "../utils/URLValidator";
 import {Alert} from "@material-ui/lab";
 
 export interface TabPanelProps {
