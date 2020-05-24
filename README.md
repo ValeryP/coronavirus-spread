@@ -16,19 +16,19 @@ dashboard.
 
 ### 1. Interactive dashboard
 
-<img src="https://monosnap.com/image/F4xHy9x1Ar00XP0u35E2ZH7ZcWkHES" width="100%">
+<img src="https://github.com/ValeryP/coronavirus-spread/blob/master/public/img/1.gif" width="100%">
 
 ### 2. Prediction of spread
 
-<img src="https://monosnap.com/image/3I86AENgefha1JUMCmLEqdOBto0dlN" width="100%">
+<img src="https://github.com/ValeryP/coronavirus-spread/blob/master/public/img/2.gif" width="100%">
 
 ### 3. Analytics charts
 
-<img src="https://monosnap.com/image/B3nSpUoaZ3jZLDfcd3ugWrRFrnKypk" width="100%">
+<img src="https://github.com/ValeryP/coronavirus-spread/blob/master/public/img/3.gif" width="100%">
 
 ### 4. Feature to add custom web page
 
-<img src="https://monosnap.com/image/zQTnwPDQ3ET1m3o3xJyFEfZa9fAxBJ" width="100%">
+<img src="https://github.com/ValeryP/coronavirus-spread/blob/master/public/img/4.gif" width="100%">
 
 ## 🚀 Quick start
 
