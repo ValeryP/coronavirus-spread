@@ -4,7 +4,7 @@ A website with integrated the worldwide dashboard, prediction of spread, and mul
 charts with daily updates. Using the (➕) button any external website can be hosted as a tab of the 
 dashboard. 
 
-- ⭐️ [Features](#-features)
+- ⭐️ Features
     - 1. [Interactive dashboard](#1-interactive-dashboard)
     - 2. [Prediction of spread](#2-prediction-of-spread)
     - 3. [Analytics charts](#3-analytics-charts)
