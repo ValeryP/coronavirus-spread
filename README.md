@@ -5,10 +5,10 @@ charts with daily updates. Using the (➕) button any external website can be ho
 dashboard. 
 
 - ⭐️ Features
-    - 1. [Interactive dashboard](#1-interactive-dashboard)
-    - 2. [Prediction of spread](#2-prediction-of-spread)
-    - 3. [Analytics charts](#3-analytics-charts)
-    - 4. [Feature to add custom web page](#4-feature-to-add-custom-web-page)
+  1. [Interactive dashboard](#1-interactive-dashboard)
+  2. [Prediction of spread](#2-prediction-of-spread)
+  3. [Analytics charts](#3-analytics-charts)
+  4. [Feature to add custom web page](#4-feature-to-add-custom-web-page)
 - 🚀 [Quick start](#-quick-start)
 - ✉️ Feedback: [Telegram](https://t.me/coronavirus_spread)
 
