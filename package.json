@@ -21,7 +21,7 @@
     "emoji-flags": "^1.2.0",
     "gh-pages": "^2.2.0",
     "lodash": "^4.17.19",
-    "moment": "^2.24.0",
+    "moment": "^2.29.2",
     "papaparse": "^5.1.1",
     "react": "^16.13.0",
     "react-chartjs-2": "^2.9.0",
